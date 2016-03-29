@@ -38,15 +38,83 @@ class MapperTest extends PHPUnit_Framework_TestCase
                         'delimiter' => '/'
                     ]
                 ],
-                'parentKey' => [
-                    'primaryKey' => true,
-                    //'columns' => ['id', 'user_id'],
-                    //'hash' => true
-                ]
+//                 'parentKey' => [
+//                     'primaryKey' => true,
+//                     //'columns' => ['id', 'user_id'],
+//                     //'hash' => true
+//                 ]
             ]
         ];
 
-        $data = [
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(['root', 'post_reactions'], array_keys($result));
+        foreach($result as $name => $file) {
+            $this->assertFileEquals('./tests/data/' . $name, $file->getPathname());
+        }
+    }
+
+    public function testParseNoPK()
+    {
+
+        $config = [
+            'timestamp' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'timestamp'
+                ]
+            ],
+            'id' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'post_id'
+                ]
+            ],
+            'user.id' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'user_id'
+                ]
+            ],
+            'reactions' => [
+                'type' => 'table',
+                'destination' => 'post_reactions',
+                'mapping' => [
+                    'user.id' => [
+                        'type' => 'column',
+                        'mapping' => [
+                            'destination' => 'user_id'
+                        ]
+                    ]
+                ],
+//                 'parentKey' => [
+//                     'primaryKey' => true,
+//                     //'columns' => ['id', 'user_id'],
+//                     //'hash' => true
+//                 ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        foreach($result as $name => $file) {
+            $this->assertFileEquals('./tests/data/noPK/' . $name, $file->getPathname());
+        }
+    }
+
+    // TODO test more cols PK
+
+    protected function getSampleData()
+    {
+        return [
             (object) [
                 'timestamp' => 1234567890,
                 'id' => 1,
@@ -71,16 +139,5 @@ class MapperTest extends PHPUnit_Framework_TestCase
                 ]
             ]
         ];
-
-        $parser = new Mapper($config);
-        $parser->parse($data);
-        $result = $parser->getCsvFiles();
-
-        foreach($result as $k => $v) {
-            $this->assertEquals(['root', 'post_reactions'], array_keys($result));
-            foreach($result as $name => $file) {
-                $this->assertFileEquals('./tests/data/' . $name, $file->getPathname());
-            }
-        }
     }
 }

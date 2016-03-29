@@ -70,7 +70,7 @@ class Mapper
                     $tableParser = $this->getParser($settings['mapping'], $settings['destination']);
                     $tableParser->setParentKey($this->getPrimaryKeyValues($row), $this->type . '_pk');
                     if (empty($this->getPrimaryKey())) {
-                        $result[$settings['mapping']['destination']] = $this->getPrimaryKeyValues($row);
+                        $result[$settings['destination']] = join(',', $this->getPrimaryKeyValues($row));
                     }
 
                     $tableParser->parse($propertyValue);
@@ -147,7 +147,7 @@ class Mapper
                 $header[] = $settings['mapping']['destination'];
             } elseif ($settings['type'] == 'table' && empty($this->getPrimaryKey())) {
                 // TODO child table link to generate
-                $header[] = $settings['mapping']['destination'];
+                $header[] = $settings['destination'];
             }
         }
         if (!empty($this->parentKey)) {
