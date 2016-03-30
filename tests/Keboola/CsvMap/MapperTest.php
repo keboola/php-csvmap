@@ -164,6 +164,48 @@ class MapperTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    public function testEmptyArray()
+    {
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id'
+                ]
+            ],
+            'arr' => [
+                'type' => 'table',
+                'destination' => 'children',
+                'tableMapping' => [
+                    'child_id' => [
+                        'mapping' => [
+                            'destination' => 'child_id'
+                        ]
+                    ]
+                ]
+            ],
+// TODO testEmptyString
+//             'text' => [
+//                 'mapping' => [
+//                     'destination' => 'text'
+//                 ]
+//             ]
+        ];
+
+        $data = [
+            (object) [
+                'id' => 1
+            ]
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(['"id","children"' . PHP_EOL, '"1",""' . PHP_EOL], file($result['root']));
+// var_dump($name, file_get_contents($file));
+
+    }
+
     protected function getSampleData()
     {
         return [

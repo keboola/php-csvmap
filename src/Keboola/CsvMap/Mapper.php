@@ -70,6 +70,13 @@ class Mapper
             }
             switch ($settings['type']) {
                 case 'table':
+                    if (empty($propertyValue)) {
+                        if (empty($this->getPrimaryKey())) {
+                            $result[$settings['destination']] = null;
+                        }
+                        break;
+                    }
+
                     $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
                     $tableParser->setParentKey($this->getPrimaryKeyValues($row), $this->type . '_pk');
                     if (empty($this->getPrimaryKey())) {
