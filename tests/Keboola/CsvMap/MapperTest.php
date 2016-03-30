@@ -164,8 +164,6 @@ class MapperTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    // TODO test more cols PK
-
     protected function getSampleData()
     {
         return [

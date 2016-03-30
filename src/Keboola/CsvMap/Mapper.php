@@ -65,6 +65,9 @@ class Mapper
         foreach($this->mapping as $key => $settings) {
             $delimiter = empty($settings['delimiter']) ? '.' : $settings['delimiter'];
             $propertyValue = Utils::getDataFromPath($key, $row, $delimiter);
+            if(empty($settings['type'])) {
+                $settings['type'] = 'column';
+            }
             switch ($settings['type']) {
                 case 'table':
                     $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
