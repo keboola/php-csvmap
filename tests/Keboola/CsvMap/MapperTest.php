@@ -29,7 +29,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
             'reactions' => [
                 'type' => 'table',
                 'destination' => 'post_reactions',
-                'mapping' => [
+                'tableMapping' => [
                     'user/id' => [
                         'type' => 'column',
                         'mapping' => [
@@ -83,7 +83,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
             'reactions' => [
                 'type' => 'table',
                 'destination' => 'post_reactions',
-                'mapping' => [
+                'tableMapping' => [
                     'user.id' => [
                         'type' => 'column',
                         'mapping' => [
@@ -107,6 +107,60 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
         foreach($result as $name => $file) {
             $this->assertFileEquals('./tests/data/noPK/' . $name, $file->getPathname());
+        }
+    }
+
+    public function testParseCompositePK()
+    {
+
+        $config = [
+            'timestamp' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'timestamp'
+                ]
+            ],
+            'id' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'post_id',
+                    'primaryKey' => true
+                ]
+            ],
+            'user.id' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'user_id',
+                    'primaryKey' => true
+                ]
+            ],
+            'reactions' => [
+                'type' => 'table',
+                'destination' => 'post_reactions',
+                'tableMapping' => [
+                    'user.id' => [
+                        'type' => 'column',
+                        'mapping' => [
+                            'destination' => 'user_id'
+                        ]
+                    ]
+                ],
+//                 'parentKey' => [
+//                     'primaryKey' => true,
+//                     //'columns' => ['id', 'user_id'],
+//                     //'hash' => true
+//                 ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        foreach($result as $name => $file) {
+            $this->assertFileEquals('./tests/data/compositePK/' . $name, $file->getPathname());
         }
     }
 

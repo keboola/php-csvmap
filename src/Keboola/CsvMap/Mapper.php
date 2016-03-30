@@ -67,7 +67,7 @@ class Mapper
             $propertyValue = Utils::getDataFromPath($key, $row, $delimiter);
             switch ($settings['type']) {
                 case 'table':
-                    $tableParser = $this->getParser($settings['mapping'], $settings['destination']);
+                    $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
                     $tableParser->setParentKey($this->getPrimaryKeyValues($row), $this->type . '_pk');
                     if (empty($this->getPrimaryKey())) {
                         $result[$settings['destination']] = join(',', $this->getPrimaryKeyValues($row));
