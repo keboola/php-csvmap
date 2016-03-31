@@ -144,6 +144,7 @@ class Mapper
     {
         if (empty($this->result)) {
             $this->result = Table::create($this->type, $this->getHeader());
+            $this->result->setPrimaryKey(array_values($this->getPrimaryKey()));
         }
 
         return $this->result;

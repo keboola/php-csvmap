@@ -202,7 +202,39 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $result = $parser->getCsvFiles();
 
         $this->assertEquals(['"id","children"' . PHP_EOL, '"1",""' . PHP_EOL], file($result['root']));
-// var_dump($name, file_get_contents($file));
+    }
+
+    public function testPrimaryKey()
+    {
+        $config = [
+            'timestamp' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'timestamp'
+                ]
+            ],
+            'id' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'post_id',
+                    'primaryKey' => true
+                ]
+            ],
+            'user.id' => [
+                'type' => 'column', // default?
+                'mapping' => [
+                    'destination' => 'user_id'
+                ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(['post_id'], $result['root']->getPrimaryKey(true));
 
     }
 
