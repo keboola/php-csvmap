@@ -8,20 +8,20 @@ class MapperTest extends PHPUnit_Framework_TestCase
     {
         $config = [
             'timestamp' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'timestamp'
                 ]
             ],
             'id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
                     'primaryKey' => true
                 ]
             ],
             'user.id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'user_id'
                 ]
@@ -63,19 +63,19 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
         $config = [
             'timestamp' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'timestamp'
                 ]
             ],
             'id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id'
                 ]
             ],
             'user.id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'user_id'
                 ]
@@ -90,12 +90,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
                             'destination' => 'user_id'
                         ]
                     ]
-                ],
-//                 'parentKey' => [
-//                     'primaryKey' => true,
-//                     //'columns' => ['id', 'user_id'],
-//                     //'hash' => true
-//                 ]
+                ]
             ]
         ];
 
@@ -115,20 +110,20 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
         $config = [
             'timestamp' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'timestamp'
                 ]
             ],
             'id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
                     'primaryKey' => true
                 ]
             ],
             'user.id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'user_id',
                     'primaryKey' => true
@@ -144,12 +139,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
                             'destination' => 'user_id'
                         ]
                     ]
-                ],
-//                 'parentKey' => [
-//                     'primaryKey' => true,
-//                     //'columns' => ['id', 'user_id'],
-//                     //'hash' => true
-//                 ]
+                ]
             ]
         ];
 
@@ -182,13 +172,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
                         ]
                     ]
                 ]
-            ],
-// TODO testEmptyString
-//             'text' => [
-//                 'mapping' => [
-//                     'destination' => 'text'
-//                 ]
-//             ]
+            ]
         ];
 
         $data = [
@@ -204,24 +188,64 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['"id","children"' . PHP_EOL, '"1",""' . PHP_EOL], file($result['root']));
     }
 
+    public function testEmptyString()
+    {
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id'
+                ]
+            ],
+            'str' => [
+                'mapping' => [
+                    'destination' => 'text'
+                ]
+            ]
+        ];
+
+        $data = [
+            (object) [
+                'id' => 1,
+                'str' => 'asdf'
+            ],
+            (object) [
+                'id' => 2
+            ]
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(
+            [
+                '"id","text"' . PHP_EOL,
+                '"1","asdf"' . PHP_EOL,
+                '"2",""' . PHP_EOL
+            ],
+            file($result['root'])
+        );
+
+    }
+
     public function testPrimaryKey()
     {
         $config = [
             'timestamp' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'timestamp'
                 ]
             ],
             'id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
                     'primaryKey' => true
                 ]
             ],
             'user.id' => [
-                'type' => 'column', // default?
+                'type' => 'column',
                 'mapping' => [
                     'destination' => 'user_id'
                 ]
@@ -235,7 +259,6 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $result = $parser->getCsvFiles();
 
         $this->assertEquals(['post_id'], $result['root']->getPrimaryKey(true));
-
     }
 
     protected function getSampleData()
