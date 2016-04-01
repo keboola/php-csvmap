@@ -78,6 +78,12 @@ class Mapper
                         break;
                     }
 
+                    foreach(['tableMapping', 'destination'] as $requiredKey) {
+                        if (empty($settings[$requiredKey])) {
+                            throw new BadConfigException("Key '{$requiredKey}' must be set for each table.");
+                        }
+                    }
+
                     $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
                     $tableParser->setParentKey($this->getPrimaryKeyValues($row), $this->type . '_pk');
                     if (empty($this->getPrimaryKey())) {

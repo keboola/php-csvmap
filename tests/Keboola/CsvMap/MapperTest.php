@@ -284,12 +284,56 @@ class MapperTest extends PHPUnit_Framework_TestCase
      * @expectedException \Keboola\CsvMap\Exception\BadConfigException
      * @expectedExceptionMessage Key 'destination' must be set for each table.
      */
-    public function testNoMappingKeyTable()
+    public function testNoDestinationTable()
     {
 
         $config = [
             'arr' => [
                 'type' => 'table'
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+    }
+
+    /**
+     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
+     * @expectedExceptionMessage Key 'tableMapping' must be set for each table.
+     */
+    public function testNoTableMapping()
+    {
+        $config = [
+            'reactions' => [
+                'type' => 'table',
+                'destination' => 'children'
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+    }
+
+    /**
+     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
+     * @expectedExceptionMessage Key 'destination' must be set for each table.
+     */
+    public function testNoDestinationNestedTable()
+    {
+        $config = [
+            'reactions' => [
+                'type' => 'table',
+                'tableMapping' => [
+                    'child_id' => [
+                        'mapping' => [
+                            'destination' => 'child_id'
+                        ]
+                    ]
+                ]
             ]
         ];
 
