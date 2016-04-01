@@ -261,6 +261,44 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['post_id'], $result['root']->getPrimaryKey(true));
     }
 
+    /**
+     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
+     * @expectedExceptionMessage Key 'mapping.destination' must be set for each column.
+     */
+    public function testNoMappingKeyColumn()
+    {
+
+        $config = [
+            'timestamp' => [
+                'type' => 'column'
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+    }
+
+    /**
+     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
+     * @expectedExceptionMessage Key 'destination' must be set for each table.
+     */
+    public function testNoMappingKeyTable()
+    {
+
+        $config = [
+            'arr' => [
+                'type' => 'table'
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+    }
+
     protected function getSampleData()
     {
         return [

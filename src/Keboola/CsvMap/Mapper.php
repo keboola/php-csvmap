@@ -4,6 +4,7 @@ namespace Keboola\CsvMap;
 
 use Keboola\CsvTable\Table;
 use Keboola\Utils\Utils;
+use Keboola\CsvMap\Exception\BadConfigException;
 
 /**
  *
@@ -155,9 +156,17 @@ class Mapper
         $header = [];
         foreach($this->mapping as $settings) {
             if (empty($settings['type']) || $settings['type'] == 'column') {
+                if (empty($settings['mapping']['destination'])) {
+                    throw new BadConfigException("Key 'mapping.destination' must be set for each column.");
+                }
+
                 $header[] = $settings['mapping']['destination'];
             } elseif ($settings['type'] == 'table' && empty($this->getPrimaryKey())) {
                 // TODO child table link to generate
+                if (empty($settings['destination'])) {
+                    throw new BadConfigException("Key 'destination' must be set for each table.");
+                }
+
                 $header[] = $settings['destination'];
             }
         }
