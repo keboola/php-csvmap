@@ -36,6 +36,11 @@ class Mapper
      */
     protected $parentKey;
 
+    /**
+     * @var string
+     */
+    protected $parentPK;
+
     public function __construct(array $mapping, $type = 'root')
     {
         $this->mapping = $mapping;
@@ -79,7 +84,16 @@ class Mapper
                     }
 
                     $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
-                    $tableParser->setParentKey($this->getPrimaryKeyValues($row, $userData), $this->type . '_pk');
+
+                    $parentKeyCol = empty($settings['parentKey']['colName'])
+                        ? $this->type . '_pk'
+                        : $settings['parentKey']['colName'];
+
+                    $tableParser->setParentKey($this->getPrimaryKeyValues($row, $userData), $parentKeyCol);
+                    if (!empty($settings['parentKey']['primaryKey'])) {
+                        $tableParser->addParentPK($parentKeyCol);
+                    }
+
                     if (empty($this->getPrimaryKey())) {
                         $result[$settings['destination']] = join(',', $this->getPrimaryKeyValues($row, $userData));
                     }
@@ -110,6 +124,10 @@ class Mapper
                 $primaryKey[$path] = $settings['mapping']['destination'];
             }
         }
+        if (!empty($this->parentPK)) {
+            $primaryKey[$this->parentPK] = $this->parentPK;
+        }
+
         return $primaryKey;
     }
 
@@ -124,7 +142,9 @@ class Mapper
             }
         } else {
             foreach($this->getPrimaryKey() as $path => $column) {
-                if (!empty($this->mapping[$path]['type']) && $this->mapping[$path]['type'] == 'user') {
+                if (!empty($this->parentKey) && $column == key($this->parentKey)) {
+                    $values[] = $this->parentKey[$column];
+                } elseif (!empty($this->mapping[$path]['type']) && $this->mapping[$path]['type'] == 'user') {
                     $values[] = $userData[$path];
                 } else {
                     $delimiter = empty($this->mapping[$path]['delimiter']) ? '.' : $this->mapping[$path]['delimiter'];
@@ -139,6 +159,14 @@ class Mapper
     public function setParentKey(array $keys, $colName)
     {
         $this->parentKey = [$colName => join(',', $keys)];
+    }
+
+    /**
+     * Add parent identifier to PK
+     */
+    public function addParentPK($colName)
+    {
+        $this->parentPK = $colName;
     }
 
     /**

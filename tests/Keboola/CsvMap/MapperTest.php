@@ -60,7 +60,6 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
     public function testParseNoPK()
     {
-
         $config = [
             'timestamp' => [
                 'type' => 'column',
@@ -107,7 +106,6 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
     public function testParseCompositePK()
     {
-
         $config = [
             'timestamp' => [
                 'type' => 'column',
@@ -152,6 +150,43 @@ class MapperTest extends PHPUnit_Framework_TestCase
         foreach($result as $name => $file) {
             $this->assertFileEquals('./tests/data/compositePK/' . $name, $file->getPathname());
         }
+    }
+
+    public function testParentKeyPK()
+    {
+        $config = [
+            'id' => [
+                'type' => 'column',
+                'mapping' => [
+                    'destination' => 'post_id',
+                    'primaryKey' => true
+                ]
+            ],
+            'reactions' => [
+                'type' => 'table',
+                'destination' => 'post_reactions',
+                'tableMapping' => [
+                    'user.id' => [
+                        'type' => 'column',
+                        'mapping' => [
+                            'destination' => 'user_id',
+                            'primaryKey' => true
+                        ]
+                    ]
+                ],
+                'parentKey' => [
+                    'primaryKey' => true
+                ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(['user_id', 'root_pk'], $result['post_reactions']->getPrimaryKey(true));
     }
 
     public function testEmptyArray()
