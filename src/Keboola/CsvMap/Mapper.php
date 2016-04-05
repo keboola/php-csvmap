@@ -22,12 +22,6 @@ class Mapper
     protected $type;
 
     /**
-     * @var Table[]
-     * Only one result per parser DELETE ME
-     */
-    protected $results;
-
-    /**
      * @var Table
      */
     protected $result;
@@ -51,16 +45,16 @@ class Mapper
     /**
      * @param array $data
      */
-    public function parse(array $data)
+    public function parse(array $data, array $userData = [])
     {
         $file = $this->getResultFile();
         foreach($data as $row) {
-            $parsedRow = $this->parseRow($row);
+            $parsedRow = $this->parseRow($row, $userData);
             $file->writeRow($parsedRow);
         }
     }
 
-    protected function parseRow($row)
+    protected function parseRow($row, array $userData)
     {
         $result = [];
         foreach($this->mapping as $key => $settings) {
@@ -85,12 +79,15 @@ class Mapper
                     }
 
                     $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
-                    $tableParser->setParentKey($this->getPrimaryKeyValues($row), $this->type . '_pk');
+                    $tableParser->setParentKey($this->getPrimaryKeyValues($row, $userData), $this->type . '_pk');
                     if (empty($this->getPrimaryKey())) {
-                        $result[$settings['destination']] = join(',', $this->getPrimaryKeyValues($row));
+                        $result[$settings['destination']] = join(',', $this->getPrimaryKeyValues($row, $userData));
                     }
 
                     $tableParser->parse($propertyValue);
+                    break;
+                case 'user':
+                    $result[$settings['mapping']['destination']] = Utils::getDataFromPath($key, $userData);
                     break;
                 case 'column':
                 default:
@@ -116,15 +113,23 @@ class Mapper
         return $primaryKey;
     }
 
-    protected function getPrimaryKeyValues($row)
+    protected function getPrimaryKeyValues($row, array $userData)
     {
         $values = [];
         if (empty($this->getPrimaryKey())) {
-            $values[] = md5(serialize($row));
+            if (empty($userData)) {
+                $values[] = md5(serialize($row));
+            } else {
+                $values[] = md5(serialize($row) . serialize($userData));
+            }
         } else {
             foreach($this->getPrimaryKey() as $path => $column) {
-                $delimiter = empty($this->mapping[$path]['delimiter']) ? '.' : $this->mapping[$path]['delimiter'];
-                $values[] = Utils::getDataFromPath($path, $row, $delimiter);
+                if (!empty($this->mapping[$path]['type']) && $this->mapping[$path]['type'] == 'user') {
+                    $values[] = $userData[$path];
+                } else {
+                    $delimiter = empty($this->mapping[$path]['delimiter']) ? '.' : $this->mapping[$path]['delimiter'];
+                    $values[] = Utils::getDataFromPath($path, $row, $delimiter);
+                }
             }
         }
 
@@ -161,7 +166,11 @@ class Mapper
     {
         $header = [];
         foreach($this->mapping as $settings) {
-            if (empty($settings['type']) || $settings['type'] == 'column') {
+            if (
+                empty($settings['type'])
+                || $settings['type'] == 'column'
+                || $settings['type'] == 'user'
+            ) {
                 if (empty($settings['mapping']['destination'])) {
                     throw new BadConfigException("Key 'mapping.destination' must be set for each column.");
                 }
@@ -183,6 +192,7 @@ class Mapper
     }
 
     /**
+     * Return own result and all children
      * @return Table[]
      */
     public function getCsvFiles()

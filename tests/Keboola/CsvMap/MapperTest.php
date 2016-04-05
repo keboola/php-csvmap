@@ -225,7 +225,6 @@ class MapperTest extends PHPUnit_Framework_TestCase
             ],
             file($result['root'])
         );
-
     }
 
     public function testPrimaryKey()
@@ -341,6 +340,123 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
         $parser = new Mapper($config);
         $parser->parse($data);
+    }
+
+    public function testDataInjection()
+    {
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id'
+                ]
+            ],
+            'userData' => [
+                'type' => 'user',
+                'mapping' => [
+                    'destination' => 'userCol'
+                ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data, ['userData' => 'blah']);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(
+            [
+                '"id","userCol"' . PHP_EOL,
+                '"1","blah"' . PHP_EOL
+            ],
+            file($result['root'])
+        );
+    }
+
+    public function testDataInjectionPK()
+    {
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id',
+                    'primaryKey' => true
+                ]
+            ],
+            'reactions' => [
+                'type' => 'table',
+                'destination' => 'post_reactions',
+                'tableMapping' => [
+                    'user.id' => [
+                        'type' => 'column',
+                        'mapping' => [
+                            'destination' => 'user_id'
+                        ]
+                    ]
+                ]
+            ],
+            'userData' => [
+                'type' => 'user',
+                'mapping' => [
+                    'destination' => 'userCol',
+                    'primaryKey' => true
+                ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data, ['userData' => 'blah']);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(
+            [
+                '"id","userCol"' . PHP_EOL,
+                '"1","blah"' . PHP_EOL
+            ],
+            file($result['root'])
+        );
+        $this->assertEquals(['id','userCol'], $result['root']->getPrimaryKey(true));
+
+        $this->assertEquals(
+            [
+                '"user_id","root_pk"' . PHP_EOL,
+                '"456","1,blah"' . PHP_EOL,
+                '"789","1,blah"' . PHP_EOL
+            ],
+            file($result['post_reactions'])
+        );
+    }
+
+    public function testDataInjectionNoData()
+    {
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id'
+                ]
+            ],
+            'userData' => [
+                'type' => 'user',
+                'mapping' => [
+                    'destination' => 'userCol'
+                ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(
+            [
+                '"id","userCol"' . PHP_EOL,
+                '"1",""' . PHP_EOL
+            ],
+            file($result['root'])
+        );
     }
 
     protected function getSampleData()
