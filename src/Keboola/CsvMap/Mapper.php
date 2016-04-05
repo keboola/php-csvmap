@@ -85,9 +85,9 @@ class Mapper
 
                     $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
 
-                    $parentKeyCol = empty($settings['parentKey']['colName'])
+                    $parentKeyCol = empty($settings['parentKey']['destination'])
                         ? $this->type . '_pk'
-                        : $settings['parentKey']['colName'];
+                        : $settings['parentKey']['destination'];
 
                     $tableParser->setParentKey($this->getPrimaryKeyValues($row, $userData), $parentKeyCol);
                     if (!empty($settings['parentKey']['primaryKey'])) {
