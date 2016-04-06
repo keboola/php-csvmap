@@ -37,6 +37,7 @@ Each item must contain the information below:
 - `parentKey`: Optional, can be used to set the parent/child link as a primary key in the chuld or override the link's column name in the child
     - `primaryKey`: boolean, same as in `column`
     - `destination`: Name of the link column (if not used, name of the parent table . `_pk` is used by default)
+    - `disable`: boolean, if set to non-false value, the parent key in the child table, as well as the column in the parent will not be saved
 
 ### User configuration
 
