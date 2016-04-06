@@ -4,7 +4,8 @@ namespace Keboola\CsvMap;
 
 use Keboola\CsvTable\Table;
 use Keboola\Utils\Utils;
-use Keboola\CsvMap\Exception\BadConfigException;
+use Keboola\CsvMap\Exception\BadConfigException,
+    Keboola\CsvMap\Exception\BadDataException;
 
 /**
  *
@@ -70,32 +71,40 @@ class Mapper
             }
             switch ($settings['type']) {
                 case 'table':
-                    if (empty($propertyValue)) {
-                        if (empty($this->getPrimaryKey())) {
-                            $result[$settings['destination']] = null;
-                        }
-                        break;
-                    }
-
                     foreach(['tableMapping', 'destination'] as $requiredKey) {
                         if (empty($settings[$requiredKey])) {
                             throw new BadConfigException("Key '{$requiredKey}' must be set for each table.");
                         }
                     }
 
-                    $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
-
-                    $parentKeyCol = empty($settings['parentKey']['destination'])
-                        ? $this->type . '_pk'
-                        : $settings['parentKey']['destination'];
-
-                    $tableParser->setParentKey($this->getPrimaryKeyValues($row, $userData), $parentKeyCol);
-                    if (!empty($settings['parentKey']['primaryKey'])) {
-                        $tableParser->addParentPK($parentKeyCol);
+                    if (empty($this->getPrimaryKey()) && empty($propertyValue)) {
+                        if (empty($settings['parentKey']['disable'])) {
+                            $result[$settings['destination']] = null;
+                        }
+                        break;
                     }
 
-                    if (empty($this->getPrimaryKey())) {
-                        $result[$settings['destination']] = join(',', $this->getPrimaryKeyValues($row, $userData));
+                    $primaryKeyValue = $this->getPrimaryKeyValues($row, $userData);
+
+                    // TODO if destination == $this->type, use $this->parse, then no tableMapping for nested is needed; disable parentkey?
+                    $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
+
+                    if (empty($settings['parentKey']['disable'])) {
+                        if (empty($this->getPrimaryKey())) {
+                            $result[$settings['destination']] = join(',', $primaryKeyValue);
+                        }
+                        $parentKeyCol = empty($settings['parentKey']['destination'])
+                            ? $this->type . '_pk'
+                            : $settings['parentKey']['destination'];
+
+                        $tableParser->setParentKey($primaryKeyValue, $parentKeyCol);
+                        if (!empty($settings['parentKey']['primaryKey'])) {
+                            $tableParser->addParentPK($parentKeyCol);
+                        }
+                    }
+                    // If propertyValue != array, wrap it
+                    if (!is_array($propertyValue)) {
+                        $propertyValue = [$propertyValue];
                     }
 
                     $tableParser->parse($propertyValue);
@@ -210,7 +219,9 @@ class Mapper
                     throw new BadConfigException("Key 'destination' must be set for each table.");
                 }
 
-                $header[] = $settings['destination'];
+                if (empty($settings['parentKey']['disable'])) {
+                    $header[] = $settings['destination'];
+                }
             }
         }
         if (!empty($this->parentKey)) {

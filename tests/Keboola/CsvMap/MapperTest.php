@@ -531,6 +531,88 @@ class MapperTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    public function testObjectToTable()
+    {
+        $data = $this->getSampleData();
+
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id'
+                ]
+            ],
+            'user' => [
+                'type' => 'table',
+                'destination' => 'users',
+                'tableMapping' => [
+                    'id' => [
+                        'mapping' => [
+                            'destination' => 'id',
+                            'primaryKey' => true
+                        ]
+                    ],
+                    'username' => [
+                        'mapping' => [
+                            'destination' => 'username'
+                        ]
+                    ]
+                ],
+                'parentKey' => [
+                    'disable' => true
+                ]
+            ],
+            'user.id' => [
+                'mapping' => [
+                    'destination' => 'user_id'
+                ]
+            ]
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(['"id","user_id"' . PHP_EOL, '"1","123"' . PHP_EOL], file($result['root']));
+        $this->assertEquals(['"id","username"' . PHP_EOL, '"123","alois"' . PHP_EOL], file($result['users']));
+    }
+
+    public function testDisableParentKey()
+    {
+
+        $config = [
+            'id' => [
+                'type' => 'column',
+                'mapping' => [
+                    'destination' => 'post_id'
+                ]
+            ],
+            'reactions' => [
+                'type' => 'table',
+                'destination' => 'post_reactions',
+                'tableMapping' => [
+                    'user.id' => [
+                        'type' => 'column',
+                        'mapping' => [
+                            'destination' => 'user_id'
+                        ]
+                    ]
+                ],
+                'parentKey' => [
+                    'disable' => true
+                ]
+            ]
+        ];
+
+        $data = $this->getSampleData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(['"post_id"' . PHP_EOL, '"1"' . PHP_EOL], file($result['root']));
+        $this->assertEquals(['"user_id"' . PHP_EOL, '"456"' . PHP_EOL, '"789"' . PHP_EOL], file($result['post_reactions']));
+    }
+
     protected function getSampleData()
     {
         return [
