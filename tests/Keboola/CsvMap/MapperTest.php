@@ -334,7 +334,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'mapping.destination' must be set for each column.
+     * @expectedExceptionMessage Key 'mapping.destination' is not set for column 'timestamp'.
      */
     public function testNoMappingKeyColumn()
     {
@@ -353,7 +353,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'destination' must be set for each table.
+     * @expectedExceptionMessage Key 'destination' is not set for table 'arr'.
      */
     public function testNoDestinationTable()
     {
@@ -372,7 +372,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'tableMapping' must be set for each table.
+     * @expectedExceptionMessage Key 'tableMapping' is not set for table 'reactions'.
      */
     public function testNoTableMapping()
     {
@@ -391,7 +391,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'destination' must be set for each table.
+     * @expectedExceptionMessage Key 'destination' is not set for table 'reactions'.
      */
     public function testNoDestinationNestedTable()
     {
