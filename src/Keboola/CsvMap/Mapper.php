@@ -95,12 +95,15 @@ class Mapper
                             $tableParser->addParentPK($parentKeyCol);
                         }
                     }
-                    // If propertyValue != array, wrap it
-                    if (!is_array($propertyValue)) {
-                        $propertyValue = [$propertyValue];
+
+                    if (!empty($propertyValue)) {
+                        // If propertyValue != array, wrap it
+                        if (!is_array($propertyValue)) {
+                            $propertyValue = [$propertyValue];
+                        }
+                        $tableParser->parse($propertyValue);
                     }
 
-                    $tableParser->parse($propertyValue);
                     break;
                 case 'user':
                     $result[$settings['mapping']['destination']] = Utils::getDataFromPath($key, $userData);
