@@ -39,6 +39,8 @@ Each item must contain the information below:
     - `destination`: Name of the link column (if not used, name of the parent table . `_pk` is used by default)
     - `disable`: boolean, if set to non-false value, the parent key in the child table, as well as the column in the parent will not be saved
 
+- If the `destination` is the same as the current parsed 'type' (destination of the parent), `parentKey.disable` **must** be true to preserve consistency of structure of the child and parent
+
 ### User configuration
 
 Same as `column`, except the **key** of the object is not searched for in the parsed data, but in an array passed to the parser to inject user data

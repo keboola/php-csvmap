@@ -613,6 +613,54 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['"user_id"' . PHP_EOL, '"456"' . PHP_EOL, '"789"' . PHP_EOL], file($result['post_reactions']));
     }
 
+    public function testChildSameParser()
+    {
+        $data = [
+            (object) [
+                'id' => 1,
+                'child' => (object) [
+                    'id' => 1.1
+                ],
+                'arrChild' => [ // redundant?
+                    (object) ['id' => '1.2']
+                ]
+            ]
+        ];
+
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'post_id'
+                ]
+            ],
+            'child' => [
+                'type' => 'table',
+                'destination' => 'items',
+                'parentKey' => [
+                    'disable' => true
+                ]
+            ],
+            'arrChild' => [
+                'type' => 'table',
+                'destination' => 'items',
+                'parentKey' => [
+                    'disable' => true
+                ]
+            ]
+        ];
+
+        $parser = new Mapper($config, 'items');
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals([
+            '"post_id"' . PHP_EOL,
+            '"1.1"' . PHP_EOL,
+            '"1.2"' . PHP_EOL,
+            '"1"' . PHP_EOL
+        ], file($result['items']));
+    }
+
     protected function getSampleData()
     {
         return [

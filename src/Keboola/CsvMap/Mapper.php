@@ -71,11 +71,7 @@ class Mapper
             }
             switch ($settings['type']) {
                 case 'table':
-                    foreach(['tableMapping', 'destination'] as $requiredKey) {
-                        if (empty($settings[$requiredKey])) {
-                            throw new BadConfigException("Key '{$requiredKey}' is not set for table '{$key}'.");
-                        }
-                    }
+                    $tableParser = $this->getParser($settings, $key);
 
                     if (empty($this->getPrimaryKey()) && empty($propertyValue)) {
                         if (empty($settings['parentKey']['disable'])) {
@@ -85,9 +81,6 @@ class Mapper
                     }
 
                     $primaryKeyValue = $this->getPrimaryKeyValues($row, $userData);
-
-                    // TODO if destination == $this->type, use $this->parse, then no tableMapping for nested is needed; disable parentkey?
-                    $tableParser = $this->getParser($settings['tableMapping'], $settings['destination']);
 
                     if (empty($settings['parentKey']['disable'])) {
                         if (empty($this->getPrimaryKey())) {
@@ -181,12 +174,26 @@ class Mapper
     /**
      * @return static
      */
-    protected function getParser(array $mapping, $type)
+    protected function getParser(array $settings, $key)
     {
-        if (empty($this->parsers[$type])) {
-            $this->parsers[$type] = new static($mapping, $type);
+        if (!empty($settings['destination']) && $settings['destination'] == $this->type) {
+            if (empty($settings['parentKey']['disable'])) {
+                throw new BadConfigException("'parentKey.disable' must be true to parse child values into parent's table");
+            }
+
+            return $this;
         }
-        return $this->parsers[$type];
+
+        foreach(['tableMapping', 'destination'] as $requiredKey) {
+            if (empty($settings[$requiredKey])) {
+                throw new BadConfigException("Key '{$requiredKey}' is not set for table '{$key}'.");
+            }
+        }
+
+        if (empty($this->parsers[$settings['destination']])) {
+            $this->parsers[$settings['destination']] = new static($settings['tableMapping'], $settings['destination']);
+        }
+        return $this->parsers[$settings['destination']];
     }
 
     protected function getResultFile()
