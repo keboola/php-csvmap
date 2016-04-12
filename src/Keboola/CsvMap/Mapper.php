@@ -101,7 +101,7 @@ class Mapper
                         if (!is_array($propertyValue)) {
                             $propertyValue = [$propertyValue];
                         }
-                        $tableParser->parse($propertyValue);
+                        $tableParser->parse($propertyValue, $userData);
                     }
 
                     break;

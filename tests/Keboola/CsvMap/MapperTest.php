@@ -531,6 +531,65 @@ class MapperTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    public function testUserDataPropagation()
+    {
+        $data = $this->getSampleData();
+
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id'
+                ]
+            ],
+            'user' => [
+                'type' => 'table',
+                'destination' => 'users',
+                'tableMapping' => [
+                    'id' => [
+                        'mapping' => [
+                            'destination' => 'id',
+                            'primaryKey' => true
+                        ]
+                    ],
+                    'username' => [
+                        'mapping' => [
+                            'destination' => 'username'
+                        ]
+                    ],
+                    'keboola_source' => [
+                        'type' => 'user',
+                        'mapping' => [
+                            'destination' => 'keboola_source'
+                        ]
+                    ]
+                ],
+                'parentKey' => [
+                    'disable' => true
+                ]
+            ],
+            'user.id' => [
+                'mapping' => [
+                    'destination' => 'user_id'
+                ]
+            ],
+            'keboola_source' => [
+                'type' => 'user',
+                'mapping' => [
+                    'destination' => 'keboola_source'
+                ]
+            ]
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($data, [
+            'keboola_source' => 'search',
+        ]);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(['"id","user_id","keboola_source"' . PHP_EOL, '"1","123","search"' . PHP_EOL], file($result['root']));
+        $this->assertEquals(['"id","username","keboola_source"' . PHP_EOL, '"123","alois","search"' . PHP_EOL], file($result['users']));
+    }
+
     public function testObjectToTable()
     {
         $data = $this->getSampleData();
