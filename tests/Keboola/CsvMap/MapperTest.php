@@ -720,6 +720,30 @@ class MapperTest extends PHPUnit_Framework_TestCase
         ], file($result['items']));
     }
 
+    public function testArrayItemToColumn()
+    {
+        $config = [
+            'arr.0' => [
+                'mapping' => [
+                    'destination' => 'first_arr_item'
+                ]
+            ]
+        ];
+
+        $data = [
+            (object) [
+                'arr' => [
+                    'one', 'two'
+                ]
+            ]
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+
+        $this->assertEquals(['"first_arr_item"' . PHP_EOL, '"one"' . PHP_EOL], file($parser->getCsvFiles()['root']));
+    }
+
     protected function getSampleData()
     {
         return [
