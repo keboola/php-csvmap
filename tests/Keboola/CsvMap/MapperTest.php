@@ -746,7 +746,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Keboola\CsvMap\Exception\BadDataException
-     * @expectedExceptionMessage Cannot write object into a column
+     * @expectedExceptionMessage Error writing 'user' column: Cannot write object into a column
      */
     public function testObjectToColumnError()
     {

@@ -65,8 +65,16 @@ class Mapper
                     throw $e;
                 }
 
-                $exception = new BadDataException($e->getMessage(), 0, $e);
-                $exception->setData($e->getContextParams());
+                $columns = [];
+                foreach($parsedRow as $key => $value) {
+                    if (!is_scalar($value) && !is_null($value)) {
+                        $columns[$key] = gettype($value);
+                    }
+                }
+                $badCols = join(',', array_keys($columns));
+
+                $exception = new BadDataException("Error writing '{$badCols}' column: " . $e->getMessage(), 0, $e);
+                $exception->setData($e->getContextParams() + ['bad_columns' => $columns]);
                 throw $exception;
             }
         }
