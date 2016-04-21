@@ -65,7 +65,9 @@ class Mapper
                     throw $e;
                 }
 
-                throw new BadDataException($e->getMessage(), 0, $e);
+                $exception = new BadDataException($e->getMessage(), 0, $e);
+                $exception->setData($e->getContextParams());
+                throw $exception;
             }
         }
     }
