@@ -3,6 +3,7 @@
 namespace Keboola\CsvMap;
 
 use Keboola\CsvTable\Table;
+use Keboola\Csv\Exception as CsvException;
 use Keboola\Utils\Utils;
 use Keboola\CsvMap\Exception\BadConfigException,
     Keboola\CsvMap\Exception\BadDataException;
@@ -56,7 +57,16 @@ class Mapper
         $file = $this->getResultFile();
         foreach($data as $row) {
             $parsedRow = $this->parseRow($row, $userData);
-            $file->writeRow($parsedRow);
+
+            try {
+                $file->writeRow($parsedRow);
+            } catch(CsvException $e) {
+                if ($e->getCode() != 3) {
+                    throw $e;
+                }
+
+                throw new BadDataException($e->getMessage(), 0, $e);
+            }
         }
     }
 

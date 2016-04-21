@@ -744,6 +744,24 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['"first_arr_item"' . PHP_EOL, '"one"' . PHP_EOL], file($parser->getCsvFiles()['root']));
     }
 
+    /**
+     * @expectedException \Keboola\CsvMap\Exception\BadDataException
+     * @expectedExceptionMessage Cannot write object into a column
+     */
+    public function testObjectToColumnError()
+    {
+        $config = [
+            'user' => [
+                'mapping' => [
+                    'destination' => 'user'
+                ]
+            ]
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($this->getSampleData());
+    }
+
     protected function getSampleData()
     {
         return [
