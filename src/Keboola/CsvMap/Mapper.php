@@ -47,6 +47,25 @@ class Mapper
     {
         $this->mapping = $mapping;
         $this->type = $type;
+
+        $this->expandShorthandDefinitions();
+    }
+
+    /**
+     * Expands shorthand definitions to theirs full definition
+     */
+    private function expandShorthandDefinitions()
+    {
+        foreach($this->mapping as $key => $settings) {
+            if (gettype($settings) === 'string' && gettype($key) === 'string') {
+                $this->mapping[$key] = [
+                    'type' => 'column',
+                    'mapping' => [
+                        'destination' => $settings
+                    ]
+                ];
+            }
+        }
     }
 
     /**
