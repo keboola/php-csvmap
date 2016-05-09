@@ -57,7 +57,7 @@ class Mapper
     private function expandShorthandDefinitions()
     {
         foreach($this->mapping as $key => $settings) {
-            if (gettype($settings) === 'string' && gettype($key) === 'string') {
+            if (is_string($key) && is_string($settings)) {
                 $this->mapping[$key] = [
                     'type' => 'column',
                     'mapping' => [
