@@ -287,7 +287,7 @@ class Mapper
     {
         $childResults = [];
         foreach($this->parsers as $type => $parser) {
-            $childResults[$type] = $parser->getCsvFiles()[$type];
+            $childResults += $parser->getCsvFiles();
         }
 
         $results = array_merge(
@@ -296,6 +296,7 @@ class Mapper
             ],
             $childResults
         );
+
         return $results;
     }
 }

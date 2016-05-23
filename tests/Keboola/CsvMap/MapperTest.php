@@ -866,7 +866,7 @@ CSV;
         $parser = new Mapper($config);
         $parser->parse($data);
 
-var_dump(array_keys($parser->getCsvFiles()));
+        $this->assertEquals(['root','child','grandchild'], array_keys($parser->getCsvFiles()));
     }
 
     protected function getSampleData()
