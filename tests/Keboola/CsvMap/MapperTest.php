@@ -99,6 +99,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
+        $this->assertEquals(['root', 'post_reactions'], array_keys($result));
         foreach($result as $name => $file) {
             $this->assertFileEquals('./tests/data/noPK/' . $name, $file->getPathname());
         }
@@ -760,6 +761,48 @@ class MapperTest extends PHPUnit_Framework_TestCase
 
         $parser = new Mapper($config);
         $parser->parse($this->getSampleData());
+    }
+
+    public function testDeepNestedTable()
+    {
+        $config = [
+            'id' => 'id',
+            'child' => [
+                'type' => 'table',
+                'destination' => 'child',
+                'tableMapping' => [
+                    'id' => 'cid',
+                    'grandchild' => [
+                        'type' => 'table',
+                        'destination' => 'grandchild',
+                        'tableMapping' => [
+                            'id' => 'gcid'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $data = [
+            (object) [
+                'id' => 1,
+                'child' => [
+                    (object) [
+                        'id' => 2,
+                        'grandchild' => [
+                            (object) [
+                                'id' => 3
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+
+var_dump(array_keys($parser->getCsvFiles()));
     }
 
     protected function getSampleData()
