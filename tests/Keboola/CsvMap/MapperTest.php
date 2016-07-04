@@ -869,6 +869,113 @@ CSV;
         $this->assertEquals(['root','child','grandchild'], array_keys($parser->getCsvFiles()));
     }
 
+    /**
+     * @expectedException Keboola\CsvMap\Exception\BadDataException
+     * @expectedExceptionMessage Error writing 'arrStr' column: Cannot write array into a column
+     */
+    public function testMixedDataError()
+    {
+        $config = [
+            'id' => 'id',
+            'arr' => [
+                'type' => 'column',
+                'mapping' => [
+                    'destination' => 'arrStr'
+                ]
+            ]
+        ];
+
+        $data = $this->getMixedData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+    }
+
+    public function testArrayToString()
+    {
+        $config = [
+            'id' => 'id',
+            'arr' => [
+                'type' => 'column',
+                'mapping' => [
+                    'destination' => 'str'
+                ],
+                'forceType' => true
+            ]
+        ];
+
+        $data = $this->getMixedData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+
+        $expected = [
+            '"id","str"' . PHP_EOL,
+            '"1","[1.1,1.2]"' . PHP_EOL,
+            '"2","2.1"' . PHP_EOL
+        ];
+
+        $this->assertEquals($expected, file($parser->getCsvFiles()['root']));
+    }
+
+    public function testStringToArray()
+    {
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id',
+                    'primaryKey' => true
+                ]
+            ],
+            'arr' => [
+                'type' => 'table',
+                'destination' => 'arr',
+                'tableMapping' => [
+                    '.' => 'data'
+                ],
+                'forceType' => true
+            ]
+        ];
+
+        $data = $this->getMixedData();
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+
+        $root = [
+            '"id"' . PHP_EOL,
+            '"1"' . PHP_EOL,
+            '"2"' . PHP_EOL
+        ];
+
+        $arr = [
+            '"data","root_pk"' . PHP_EOL,
+            '"1.1","1"' . PHP_EOL,
+            '"1.2","1"' . PHP_EOL,
+            '"2.1","2"' . PHP_EOL
+        ];
+
+        $this->assertEquals($root, file($parser->getCsvFiles()['root']));
+        $this->assertEquals($arr, file($parser->getCsvFiles()['arr']));
+    }
+
+    protected function getMixedData()
+    {
+        return [
+            (object) [
+                'id' => 1,
+                'arr' => [
+                    1.1,
+                    1.2
+                ]
+            ],
+            (object) [ // poor data
+                'id' => 2,
+                'arr' => 2.1
+            ]
+        ];
+    }
+
     protected function getSampleData()
     {
         return [

@@ -149,6 +149,10 @@ class Mapper
                     break;
                 case 'column':
                 default:
+                    if (!is_scalar($propertyValue) && !is_null($propertyValue) && !empty($settings['forceType'])) {
+                        $propertyValue = json_encode($propertyValue);
+                    }
+
                     $result[$settings['mapping']['destination']] = $propertyValue;
                     break;
             }

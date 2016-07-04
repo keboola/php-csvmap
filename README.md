@@ -28,6 +28,7 @@ Each item must contain the information below:
 - `mapping`: Required, must contain `destination`:
     - `destination`: Target column in the output CSV file
     - `primaryKey`: Optional, boolean. If set to true, the column will be included in the primary key
+- `forceType`: Optional, if a value is not scalar, it'll be JSON encoded
 
 ### Table configuration
 
