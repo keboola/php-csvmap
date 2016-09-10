@@ -1,4 +1,6 @@
-# Usage
+# PHP CsvMap
+
+[![Build Status](https://travis-ci.org/keboola/php-csvmap.svg?branch=master)](https://travis-ci.org/keboola/php-csvmap)
 
 ## Configuration
 
