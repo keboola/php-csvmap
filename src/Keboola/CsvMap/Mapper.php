@@ -135,13 +135,11 @@ class Mapper
                         }
                     }
 
-                    if (!empty($propertyValue)) {
-                        // If propertyValue != array, wrap it
-                        if (!is_array($propertyValue)) {
-                            $propertyValue = [$propertyValue];
-                        }
-                        $tableParser->parse($propertyValue, $userData);
+                    // If propertyValue != array, wrap it
+                    if (!is_array($propertyValue)) {
+                        $propertyValue = [$propertyValue];
                     }
+                    $tableParser->parse($propertyValue, $userData);
 
                     break;
                 case 'user':
