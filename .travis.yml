@@ -1,18 +1,24 @@
 language: php
-before_script: composer install
+
 php:
   - 5.6
   - 7.0
+  - nightly
   - hhvm
-matrix:
-  allow_failures:
-  - php: hhvm
-install:
-- composer install --dev --no-scripts
-script:
-- php vendor/bin/phpunit --coverage-clover build/logs/clover.xml --whitelist=src/
-after_success:
-- bash <(curl -s https://codecov.io/bash)
-- ./vendor/bin/test-reporter --stdout > codeclimate.json
-- "curl -X POST -d @codeclimate.json -H 'Content-Type: application/json' -H 'User-Agent: Code Climate (PHP Test Reporter v0.1.1)' https://codeclimate.com/test_reports"
 
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php: hhvm
+    - php: nightly
+
+install:
+  - composer install --prefer-dist --no-interaction
+
+script:
+  - php vendor/bin/phpunit --coverage-clover build/logs/clover.xml --whitelist=src/
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - ./vendor/bin/test-reporter --stdout > codeclimate.json
+  - "curl -X POST -d @codeclimate.json -H 'Content-Type: application/json' -H 'User-Agent: Code Climate (PHP Test Reporter v0.1.1)' https://codeclimate.com/test_reports"
