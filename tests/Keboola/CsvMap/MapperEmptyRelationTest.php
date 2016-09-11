@@ -1,8 +1,8 @@
 <?php
 
-use Keboola\CsvMap\Mapper;
+namespace Keboola\CsvMap;
 
-class MapperEmptyRelationTest extends PHPUnit_Framework_TestCase
+class MapperEmptyRelationTest extends \PHPUnit_Framework_TestCase
 {
     public function testParseEmptyRelation()
     {

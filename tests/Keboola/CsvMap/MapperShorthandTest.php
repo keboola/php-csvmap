@@ -1,8 +1,8 @@
 <?php
 
-use Keboola\CsvMap\Mapper;
+namespace Keboola\CsvMap;
 
-class MapperShorthandTest extends PHPUnit_Framework_TestCase
+class MapperShorthandTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testParseShorthand()

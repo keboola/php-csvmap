@@ -1,8 +1,8 @@
 <?php
 
-use Keboola\CsvMap\Mapper;
+namespace Keboola\CsvMap;
 
-class MapperTest extends PHPUnit_Framework_TestCase
+class MapperTest extends \PHPUnit_Framework_TestCase
 {
     public function testParse()
     {
@@ -53,7 +53,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $result = $parser->getCsvFiles();
 
         $this->assertEquals(['root', 'post_reactions'], array_keys($result));
-        foreach($result as $name => $file) {
+        foreach ($result as $name => $file) {
             $this->assertFileEquals('./tests/data/' . $name, $file->getPathname());
         }
     }
@@ -100,7 +100,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $result = $parser->getCsvFiles();
 
         $this->assertEquals(['root', 'post_reactions'], array_keys($result));
-        foreach($result as $name => $file) {
+        foreach ($result as $name => $file) {
             $this->assertFileEquals('./tests/data/noPK/' . $name, $file->getPathname());
         }
     }
@@ -148,7 +148,7 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
-        foreach($result as $name => $file) {
+        foreach ($result as $name => $file) {
             $this->assertFileEquals('./tests/data/compositePK/' . $name, $file->getPathname());
         }
     }
@@ -587,8 +587,14 @@ class MapperTest extends PHPUnit_Framework_TestCase
         ]);
         $result = $parser->getCsvFiles();
 
-        $this->assertEquals(['"id","user_id","keboola_source"' . PHP_EOL, '"1","123","search"' . PHP_EOL], file($result['root']));
-        $this->assertEquals(['"id","username","keboola_source"' . PHP_EOL, '"123","alois","search"' . PHP_EOL], file($result['users']));
+        $this->assertEquals([
+            '"id","user_id","keboola_source"' . PHP_EOL,
+            '"1","123","search"' . PHP_EOL
+        ], file($result['root']));
+        $this->assertEquals([
+            '"id","username","keboola_source"' . PHP_EOL,
+            '"123","alois","search"' . PHP_EOL
+        ], file($result['users']));
     }
 
     public function testObjectToTable()
@@ -669,8 +675,14 @@ class MapperTest extends PHPUnit_Framework_TestCase
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
-        $this->assertEquals(['"post_id"' . PHP_EOL, '"1"' . PHP_EOL], file($result['root']));
-        $this->assertEquals(['"user_id"' . PHP_EOL, '"456"' . PHP_EOL, '"789"' . PHP_EOL], file($result['post_reactions']));
+        $this->assertEquals([
+            '"post_id"' . PHP_EOL,
+            '"1"' . PHP_EOL
+        ], file($result['root']));
+        $this->assertEquals([
+            '"user_id"' . PHP_EOL, '"456"' . PHP_EOL,
+            '"789"' . PHP_EOL
+        ], file($result['post_reactions']));
     }
 
     public function testChildSameParser()

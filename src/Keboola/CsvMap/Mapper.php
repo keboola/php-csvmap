@@ -5,8 +5,8 @@ namespace Keboola\CsvMap;
 use Keboola\CsvTable\Table;
 use Keboola\Csv\Exception as CsvException;
 use Keboola\Utils\Utils;
-use Keboola\CsvMap\Exception\BadConfigException,
-    Keboola\CsvMap\Exception\BadDataException;
+use Keboola\CsvMap\Exception\BadConfigException;
+use Keboola\CsvMap\Exception\BadDataException;
 
 /**
  *
@@ -56,7 +56,7 @@ class Mapper
      */
     private function expandShorthandDefinitions()
     {
-        foreach($this->mapping as $key => $settings) {
+        foreach ($this->mapping as $key => $settings) {
             if (is_string($key) && is_string($settings)) {
                 $this->mapping[$key] = [
                     'type' => 'column',
@@ -74,18 +74,18 @@ class Mapper
     public function parse(array $data, array $userData = [])
     {
         $file = $this->getResultFile();
-        foreach($data as $row) {
+        foreach ($data as $row) {
             $parsedRow = $this->parseRow($row, $userData);
 
             try {
                 $file->writeRow($parsedRow);
-            } catch(CsvException $e) {
+            } catch (CsvException $e) {
                 if ($e->getCode() != 3) {
                     throw $e;
                 }
 
                 $columns = [];
-                foreach($parsedRow as $key => $value) {
+                foreach ($parsedRow as $key => $value) {
                     if (!is_scalar($value) && !is_null($value)) {
                         $columns[$key] = gettype($value);
                     }
@@ -102,10 +102,10 @@ class Mapper
     protected function parseRow($row, array $userData)
     {
         $result = [];
-        foreach($this->mapping as $key => $settings) {
+        foreach ($this->mapping as $key => $settings) {
             $delimiter = empty($settings['delimiter']) ? '.' : $settings['delimiter'];
             $propertyValue = Utils::getDataFromPath($key, $row, $delimiter);
-            if(empty($settings['type'])) {
+            if (empty($settings['type'])) {
                 $settings['type'] = 'column';
             }
             switch ($settings['type']) {
@@ -165,7 +165,7 @@ class Mapper
     public function getPrimaryKey()
     {
         $primaryKey = [];
-        foreach($this->mapping as $path => $settings) {
+        foreach ($this->mapping as $path => $settings) {
             if (!empty($settings['mapping']['primaryKey'])) {
                 $primaryKey[$path] = $settings['mapping']['destination'];
             }
@@ -187,7 +187,7 @@ class Mapper
                 $values[] = md5(serialize($row) . serialize($userData));
             }
         } else {
-            foreach($this->getPrimaryKey() as $path => $column) {
+            foreach ($this->getPrimaryKey() as $path => $column) {
                 if (!empty($this->parentKey) && $column == key($this->parentKey)) {
                     $values[] = $this->parentKey[$column];
                 } elseif (!empty($this->mapping[$path]['type']) && $this->mapping[$path]['type'] == 'user') {
@@ -222,13 +222,15 @@ class Mapper
     {
         if (!empty($settings['destination']) && $settings['destination'] == $this->type) {
             if (empty($settings['parentKey']['disable'])) {
-                throw new BadConfigException("'parentKey.disable' must be true to parse child values into parent's table");
+                throw new BadConfigException(
+                    "'parentKey.disable' must be true to parse child values into parent's table"
+                );
             }
 
             return $this;
         }
 
-        foreach(['tableMapping', 'destination'] as $requiredKey) {
+        foreach (['tableMapping', 'destination'] as $requiredKey) {
             if (empty($settings[$requiredKey])) {
                 throw new BadConfigException("Key '{$requiredKey}' is not set for table '{$key}'.");
             }
@@ -253,9 +255,8 @@ class Mapper
     protected function getHeader()
     {
         $header = [];
-        foreach($this->mapping as $key => $settings) {
-            if (
-                empty($settings['type'])
+        foreach ($this->mapping as $key => $settings) {
+            if (empty($settings['type'])
                 || $settings['type'] == 'column'
                 || $settings['type'] == 'user'
             ) {
@@ -288,7 +289,7 @@ class Mapper
     public function getCsvFiles()
     {
         $childResults = [];
-        foreach($this->parsers as $type => $parser) {
+        foreach ($this->parsers as $type => $parser) {
             $childResults += $parser->getCsvFiles();
         }
 
