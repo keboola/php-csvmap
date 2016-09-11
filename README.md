@@ -1,7 +1,9 @@
 # CsvMap
 
 [![Build Status](https://travis-ci.org/keboola/php-csvmap.svg?branch=master)](https://travis-ci.org/keboola/php-csvmap)
-
+[![Latest Stable Version](https://poser.pugx.org/keboola/csvmap/version)](https://packagist.org/packages/keboola/csvmap)
+[![Total Downloads](https://poser.pugx.org/keboola/csvmap/downloads)](https://packagist.org/packages/keboola/csvmap)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/keboola/php-csvmap/blob/master/LICENSE.md)
 ## Configuration
 
 The module's configuration must be an object where each item's key is a path in the parsed object (`.` delimited for nesting by default).
