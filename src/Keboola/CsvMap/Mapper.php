@@ -4,7 +4,6 @@ namespace Keboola\CsvMap;
 
 use Keboola\CsvTable\Table;
 use Keboola\Csv\Exception as CsvException;
-use Keboola\Utils\Utils;
 use Keboola\CsvMap\Exception\BadConfigException;
 use Keboola\CsvMap\Exception\BadDataException;
 
@@ -104,7 +103,7 @@ class Mapper
         $result = [];
         foreach ($this->mapping as $key => $settings) {
             $delimiter = empty($settings['delimiter']) ? '.' : $settings['delimiter'];
-            $propertyValue = Utils::getDataFromPath($key, $row, $delimiter);
+            $propertyValue = \Keboola\Utils\getDataFromPath($key, $row, $delimiter);
             if (empty($settings['type'])) {
                 $settings['type'] = 'column';
             }
@@ -143,7 +142,7 @@ class Mapper
 
                     break;
                 case 'user':
-                    $result[$settings['mapping']['destination']] = Utils::getDataFromPath($key, $userData);
+                    $result[$settings['mapping']['destination']] = \Keboola\Utils\getDataFromPath($key, $userData);
                     break;
                 case 'column':
                 default:
@@ -194,7 +193,7 @@ class Mapper
                     $values[] = $userData[$path];
                 } else {
                     $delimiter = empty($this->mapping[$path]['delimiter']) ? '.' : $this->mapping[$path]['delimiter'];
-                    $values[] = Utils::getDataFromPath($path, $row, $delimiter);
+                    $values[] = \Keboola\Utils\getDataFromPath($path, $row, $delimiter);
                 }
             }
         }

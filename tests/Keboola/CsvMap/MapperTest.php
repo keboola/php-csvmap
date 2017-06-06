@@ -907,6 +907,48 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($arr, file($parser->getCsvFiles()['arr']));
     }
 
+    public function testArrayToTable()
+    {
+        $config = [
+            'rows' => [
+                'type' => 'table',
+                'destination' => 'report-rows',
+                'tableMapping' => [
+                    '0' => [
+                        'type' => 'column',
+                        'mapping' => [
+                            'destination' => 'date'
+                        ]
+                    ],
+                    '1' => [
+                        'type' => 'column',
+                        'mapping' => [
+                            'destination' => 'clicks'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $data = json_decode('[{
+            "rows": [
+                ["2017-05-27","83008"],
+                ["2017-05-28","105723"]
+            ]
+        }]');
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+
+        $expected = [
+            '"date","clicks","root_pk"' . PHP_EOL,
+            '"2017-05-27","83008","20afe46b23b7afa04d50a036bc3b9021"' . PHP_EOL,
+            '"2017-05-28","105723","20afe46b23b7afa04d50a036bc3b9021"' . PHP_EOL
+        ];
+
+        $this->assertEquals($expected, file($parser->getCsvFiles()['report-rows']));
+    }
+
     protected function getMixedData()
     {
         return [
