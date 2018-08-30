@@ -119,6 +119,7 @@ class Mapper
                     }
 
                     $primaryKeyValue = $this->getPrimaryKeyValues($row, $userData);
+                    $this->checkPrimaryKeyValues($primaryKeyValue);
 
                     if (empty($settings['parentKey']['disable'])) {
                         if (empty($this->getPrimaryKey())) {
@@ -159,6 +160,17 @@ class Mapper
         }
 
         return $result;
+    }
+
+    private function checkPrimaryKeyValues(array $values)
+    {
+        foreach ($values as $value) {
+            if (!is_scalar($value) && !is_null($value)) {
+                throw new BadConfigException(
+                    'Only scalar values are allowed in primary key. Primary key: ' . json_encode($values)
+                );
+            }
+        }
     }
 
     public function getPrimaryKey()
