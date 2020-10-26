@@ -2,6 +2,8 @@
 
 namespace Keboola\CsvMap;
 
+use Keboola\CsvMap\Exception\BadConfigException;
+use Keboola\CsvMap\Exception\BadDataException;
 use PHPUnit\Framework\TestCase;
 
 class MapperTest extends TestCase
@@ -335,10 +337,6 @@ class MapperTest extends TestCase
         $this->assertEquals(['post_id'], $result['root']->getPrimaryKey(true));
     }
 
-    /**
-     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'mapping.destination' is not set for column 'timestamp'.
-     */
     public function testNoMappingKeyColumn()
     {
 
@@ -351,13 +349,12 @@ class MapperTest extends TestCase
         $data = $this->getSampleData();
 
         $parser = new Mapper($config);
+
+        $this->expectException(BadConfigException::class);
+        $this->expectExceptionMessage("Key 'mapping.destination' is not set for column 'timestamp'.");
         $parser->parse($data);
     }
 
-    /**
-     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'destination' is not set for table 'arr'.
-     */
     public function testNoDestinationTable()
     {
 
@@ -368,15 +365,13 @@ class MapperTest extends TestCase
         ];
 
         $data = $this->getSampleData();
-
         $parser = new Mapper($config);
+
+        $this->expectException(BadConfigException::class);
+        $this->expectExceptionMessage("Key 'destination' is not set for table 'arr'.");
         $parser->parse($data);
     }
 
-    /**
-     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'tableMapping' is not set for table 'reactions'.
-     */
     public function testNoTableMapping()
     {
         $config = [
@@ -387,15 +382,13 @@ class MapperTest extends TestCase
         ];
 
         $data = $this->getSampleData();
-
         $parser = new Mapper($config);
+
+        $this->expectException(BadConfigException::class);
+        $this->expectExceptionMessage("Key 'tableMapping' is not set for table 'reactions'.");
         $parser->parse($data);
     }
 
-    /**
-     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Key 'destination' is not set for table 'reactions'.
-     */
     public function testNoDestinationNestedTable()
     {
         $config = [
@@ -412,8 +405,10 @@ class MapperTest extends TestCase
         ];
 
         $data = $this->getSampleData();
-
         $parser = new Mapper($config);
+
+        $this->expectException(BadConfigException::class);
+        $this->expectExceptionMessage("Key 'destination' is not set for table 'reactions'.");
         $parser->parse($data);
     }
 
@@ -768,10 +763,6 @@ class MapperTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Keboola\CsvMap\Exception\BadDataException
-     * @expectedExceptionMessage Error writing 'user' column: Cannot write data into column: stdClass
-     */
     public function testObjectToColumnError()
     {
         $config = [
@@ -783,6 +774,9 @@ class MapperTest extends TestCase
         ];
 
         $parser = new Mapper($config);
+
+        $this->expectException(BadDataException::class);
+        $this->expectExceptionMessage("Error writing 'user' column: Cannot write data into column: ");
         $parser->parse($this->getSampleData());
     }
 
@@ -828,10 +822,6 @@ class MapperTest extends TestCase
         $this->assertEquals(['root','child','grandchild'], array_keys($parser->getCsvFiles()));
     }
 
-    /**
-     * @expectedException Keboola\CsvMap\Exception\BadDataException
-     * @expectedExceptionMessage Error writing 'arrStr' column: Cannot write data into column: array
-     */
     public function testMixedDataError()
     {
         $config = [
@@ -847,6 +837,9 @@ class MapperTest extends TestCase
         $data = $this->getMixedData();
 
         $parser = new Mapper($config);
+
+        $this->expectException(BadDataException::class);
+        $this->expectExceptionMessage("Error writing 'arrStr' column: Cannot write data into column: array");
         $parser->parse($data);
     }
 
