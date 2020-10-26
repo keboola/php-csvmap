@@ -11,7 +11,7 @@
     ],
     "require": {
         "keboola/php-utils": "^4.1",
-        "keboola/php-csvtable": "^1.0",
+        "keboola/php-csvtable": "^1.1",
         "keboola/csv": "^2.1",
         "php": "^7.1",
         "ext-json": "*"

@@ -15,6 +15,11 @@ class Mapper
     protected $mapping;
 
     /**
+     * @var bool
+     */
+    protected $writeHeader;
+
+    /**
      * @var string
      */
     protected $type;
@@ -39,9 +44,10 @@ class Mapper
      */
     protected $parentPK;
 
-    public function __construct(array $mapping, $type = 'root')
+    public function __construct(array $mapping, bool $writeHeader = true, $type = 'root')
     {
         $this->mapping = $mapping;
+        $this->writeHeader = $writeHeader;
         $this->type = $type;
 
         $this->expandShorthandDefinitions();
@@ -245,7 +251,8 @@ class Mapper
         }
 
         if (empty($this->parsers[$settings['destination']])) {
-            $this->parsers[$settings['destination']] = new static($settings['tableMapping'], $settings['destination']);
+            $this->parsers[$settings['destination']] =
+                new static($settings['tableMapping'], $this->writeHeader, $settings['destination']);
         }
         return $this->parsers[$settings['destination']];
     }
@@ -253,7 +260,7 @@ class Mapper
     protected function getResultFile()
     {
         if (empty($this->result)) {
-            $this->result = new Table($this->type, $this->getHeader());
+            $this->result = new Table($this->type, $this->getHeader(), $this->writeHeader);
             $this->result->setPrimaryKey(array_values($this->getPrimaryKey()));
         }
 

@@ -729,7 +729,7 @@ class MapperTest extends TestCase
             ]
         ];
 
-        $parser = new Mapper($config, 'items');
+        $parser = new Mapper($config, true, 'items');
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
@@ -960,6 +960,22 @@ class MapperTest extends TestCase
         $this->assertEquals($expected, file($parser->getCsvFiles()['report-rows']->getPathName()));
     }
 
+    public function testDontWriteHeader()
+    {
+        $mapping = [
+            'id' => 'id',
+            'timestamp' => 'time',
+        ];
+
+        $data = $this->getSampleDataSimple();
+        $parser = new Mapper($mapping, false); // <<<<<< false
+        $parser->parse($data);
+        $file = $parser->getCsvFiles()['root'];
+
+        $this->assertEquals("\"1\",\"1234567890\"\n", file_get_contents($file->getPathname()));
+        $this->assertEquals(['id', 'time'], $file->getHeader());
+    }
+
     protected function getMixedData()
     {
         return [
@@ -1004,5 +1020,19 @@ class MapperTest extends TestCase
                 ]
             ]
         ];
+    }
+
+    protected function getSampleDataSimple()
+    {
+        $json = <<<JSON
+[
+    {
+        "timestamp": 1234567890,
+        "id": 1,
+        "reactions": []
+    }
+]
+JSON;
+        return json_decode($json, true);
     }
 }
