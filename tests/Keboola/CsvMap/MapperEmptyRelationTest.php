@@ -2,7 +2,9 @@
 
 namespace Keboola\CsvMap;
 
-class MapperEmptyRelationTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class MapperEmptyRelationTest extends TestCase
 {
     public function testParseEmptyRelation()
     {

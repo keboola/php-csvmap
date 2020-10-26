@@ -2,7 +2,9 @@
 
 namespace Keboola\CsvMap;
 
-class MapperNotAllowedPrimaryKeyValueTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class MapperNotAllowedPrimaryKeyValueTest extends TestCase
 {
     /**
      * @expectedException \Keboola\CsvMap\Exception\BadConfigException

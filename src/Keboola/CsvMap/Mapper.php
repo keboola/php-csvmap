@@ -7,9 +7,6 @@ use Keboola\Csv\Exception as CsvException;
 use Keboola\CsvMap\Exception\BadConfigException;
 use Keboola\CsvMap\Exception\BadDataException;
 
-/**
- *
- */
 class Mapper
 {
     /**
@@ -92,7 +89,7 @@ class Mapper
                 $badCols = join(',', array_keys($columns));
 
                 $exception = new BadDataException("Error writing '{$badCols}' column: " . $e->getMessage(), 0, $e);
-                $exception->setData($e->getContextParams() + ['bad_columns' => $columns]);
+                $exception->setData(['bad_columns' => $columns]);
                 throw $exception;
             }
         }
@@ -256,7 +253,7 @@ class Mapper
     protected function getResultFile()
     {
         if (empty($this->result)) {
-            $this->result = Table::create($this->type, $this->getHeader());
+            $this->result = new Table($this->type, $this->getHeader());
             $this->result->setPrimaryKey(array_values($this->getPrimaryKey()));
         }
 

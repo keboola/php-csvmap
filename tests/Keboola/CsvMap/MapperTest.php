@@ -2,7 +2,9 @@
 
 namespace Keboola\CsvMap;
 
-class MapperTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class MapperTest extends TestCase
 {
     public function testParse()
     {
@@ -224,7 +226,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
-        $this->assertEquals('"user_id","post_id"' . PHP_EOL, file($result['post_reactions'])[0]);
+        $this->assertEquals('"user_id","post_id"' . PHP_EOL, file($result['post_reactions']->getPathName())[0]);
     }
 
     public function testEmptyArray()
@@ -258,7 +260,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
-        $this->assertEquals(['"id","children"' . PHP_EOL, '"1",""' . PHP_EOL], file($result['root']));
+        $this->assertEquals(['"id","children"' . PHP_EOL, '"1",""' . PHP_EOL], file($result['root']->getPathName()));
     }
 
     public function testEmptyString()
@@ -296,7 +298,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
                 '"1","asdf"' . PHP_EOL,
                 '"2",""' . PHP_EOL
             ],
-            file($result['root'])
+            file($result['root']->getPathName())
         );
     }
 
@@ -442,7 +444,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
                 '"id","userCol"' . PHP_EOL,
                 '"1","blah"' . PHP_EOL
             ],
-            file($result['root'])
+            file($result['root']->getPathName())
         );
     }
 
@@ -487,7 +489,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
                 '"id","userCol"' . PHP_EOL,
                 '"1","blah"' . PHP_EOL
             ],
-            file($result['root'])
+            file($result['root']->getPathName())
         );
         $this->assertEquals(['id','userCol'], $result['root']->getPrimaryKey(true));
 
@@ -497,7 +499,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
                 '"456","1,blah"' . PHP_EOL,
                 '"789","1,blah"' . PHP_EOL
             ],
-            file($result['post_reactions'])
+            file($result['post_reactions']->getPathName())
         );
     }
 
@@ -528,7 +530,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
                 '"id","userCol"' . PHP_EOL,
                 '"1",""' . PHP_EOL
             ],
-            file($result['root'])
+            file($result['root']->getPathName())
         );
     }
 
@@ -590,11 +592,11 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             '"id","user_id","keboola_source"' . PHP_EOL,
             '"1","123","search"' . PHP_EOL
-        ], file($result['root']));
+        ], file($result['root']->getPathName()));
         $this->assertEquals([
             '"id","username","keboola_source"' . PHP_EOL,
             '"123","alois","search"' . PHP_EOL
-        ], file($result['users']));
+        ], file($result['users']->getPathName()));
     }
 
     public function testObjectToTable()
@@ -638,8 +640,14 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
-        $this->assertEquals(['"id","user_id"' . PHP_EOL, '"1","123"' . PHP_EOL], file($result['root']));
-        $this->assertEquals(['"id","username"' . PHP_EOL, '"123","alois"' . PHP_EOL], file($result['users']));
+        $this->assertEquals(
+            ['"id","user_id"' . PHP_EOL, '"1","123"' . PHP_EOL],
+            file($result['root']->getPathName())
+        );
+        $this->assertEquals(
+            ['"id","username"' . PHP_EOL, '"123","alois"' . PHP_EOL],
+            file($result['users']->getPathName())
+        );
     }
 
     public function testDisableParentKey()
@@ -678,11 +686,11 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             '"post_id"' . PHP_EOL,
             '"1"' . PHP_EOL
-        ], file($result['root']));
+        ], file($result['root']->getPathName()));
         $this->assertEquals([
             '"user_id"' . PHP_EOL, '"456"' . PHP_EOL,
             '"789"' . PHP_EOL
-        ], file($result['post_reactions']));
+        ], file($result['post_reactions']->getPathName()));
     }
 
     public function testChildSameParser()
@@ -730,7 +738,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             '"1.1"' . PHP_EOL,
             '"1.2"' . PHP_EOL,
             '"1"' . PHP_EOL
-        ], file($result['items']));
+        ], file($result['items']->getPathName()));
     }
 
     public function testArrayItemToColumn()
@@ -754,12 +762,15 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $parser = new Mapper($config);
         $parser->parse($data);
 
-        $this->assertEquals(['"first_arr_item"' . PHP_EOL, '"one"' . PHP_EOL], file($parser->getCsvFiles()['root']));
+        $this->assertEquals(
+            ['"first_arr_item"' . PHP_EOL, '"one"' . PHP_EOL],
+            file($parser->getCsvFiles()['root']->getPathName())
+        );
     }
 
     /**
      * @expectedException \Keboola\CsvMap\Exception\BadDataException
-     * @expectedExceptionMessage Error writing 'user' column: Cannot write object into a column
+     * @expectedExceptionMessage Error writing 'user' column: Cannot write data into column: stdClass
      */
     public function testObjectToColumnError()
     {
@@ -819,7 +830,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Keboola\CsvMap\Exception\BadDataException
-     * @expectedExceptionMessage Error writing 'arrStr' column: Cannot write array into a column
+     * @expectedExceptionMessage Error writing 'arrStr' column: Cannot write data into column: array
      */
     public function testMixedDataError()
     {
@@ -863,7 +874,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             '"2","2.1"' . PHP_EOL
         ];
 
-        $this->assertEquals($expected, file($parser->getCsvFiles()['root']));
+        $this->assertEquals($expected, file($parser->getCsvFiles()['root']->getPathName()));
     }
 
     public function testStringToArray()
@@ -903,8 +914,8 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             '"2.1","2"' . PHP_EOL
         ];
 
-        $this->assertEquals($root, file($parser->getCsvFiles()['root']));
-        $this->assertEquals($arr, file($parser->getCsvFiles()['arr']));
+        $this->assertEquals($root, file($parser->getCsvFiles()['root']->getPathName()));
+        $this->assertEquals($arr, file($parser->getCsvFiles()['arr']->getPathName()));
     }
 
     public function testArrayToTable()
@@ -946,7 +957,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             '"2017-05-28","105723","20afe46b23b7afa04d50a036bc3b9021"' . PHP_EOL
         ];
 
-        $this->assertEquals($expected, file($parser->getCsvFiles()['report-rows']));
+        $this->assertEquals($expected, file($parser->getCsvFiles()['report-rows']->getPathName()));
     }
 
     protected function getMixedData()
