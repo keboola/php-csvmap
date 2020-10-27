@@ -2,7 +2,9 @@
 
 namespace Keboola\CsvMap;
 
-class MapperShorthandTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class MapperShorthandTest extends TestCase
 {
 
     public function testParseShorthand()

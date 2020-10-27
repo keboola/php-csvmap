@@ -2,11 +2,12 @@
 
 namespace Keboola\CsvMap;
 
-class MapperNotAllowedPrimaryKeyValueTest extends \PHPUnit_Framework_TestCase
+use Keboola\CsvMap\Exception\BadConfigException;
+use PHPUnit\Framework\TestCase;
+
+class MapperNotAllowedPrimaryKeyValueTest extends TestCase
 {
     /**
-     * @expectedException \Keboola\CsvMap\Exception\BadConfigException
-     * @expectedExceptionMessage Only scalar values are allowed in primary key.
      * Primary key: [{"$oid":"5716054bee6e764c94fa85a6"}]
      */
     public function testNotAllowedPrimaryKeyValue()
@@ -29,8 +30,10 @@ class MapperNotAllowedPrimaryKeyValueTest extends \PHPUnit_Framework_TestCase
         ];
 
         $data = $this->getSampleData();
-
         $parser = new Mapper($config);
+
+        $this->expectException(BadConfigException::class);
+        $this->expectExceptionMessage('Only scalar values are allowed in primary key.');
         $parser->parse($data);
     }
 

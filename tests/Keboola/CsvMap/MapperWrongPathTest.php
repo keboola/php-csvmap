@@ -2,7 +2,9 @@
 
 namespace Keboola\CsvMap;
 
-class MapperWrongPathTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class MapperWrongPathTest extends TestCase
 {
     public function testParseWrongMain()
     {

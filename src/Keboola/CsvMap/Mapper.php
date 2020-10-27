@@ -7,15 +7,17 @@ use Keboola\Csv\Exception as CsvException;
 use Keboola\CsvMap\Exception\BadConfigException;
 use Keboola\CsvMap\Exception\BadDataException;
 
-/**
- *
- */
 class Mapper
 {
     /**
      * @var array
      */
     protected $mapping;
+
+    /**
+     * @var bool
+     */
+    protected $writeHeader;
 
     /**
      * @var string
@@ -42,9 +44,10 @@ class Mapper
      */
     protected $parentPK;
 
-    public function __construct(array $mapping, $type = 'root')
+    public function __construct(array $mapping, bool $writeHeader = true, $type = 'root')
     {
         $this->mapping = $mapping;
+        $this->writeHeader = $writeHeader;
         $this->type = $type;
 
         $this->expandShorthandDefinitions();
@@ -92,7 +95,7 @@ class Mapper
                 $badCols = join(',', array_keys($columns));
 
                 $exception = new BadDataException("Error writing '{$badCols}' column: " . $e->getMessage(), 0, $e);
-                $exception->setData($e->getContextParams() + ['bad_columns' => $columns]);
+                $exception->setData(['bad_columns' => $columns]);
                 throw $exception;
             }
         }
@@ -248,7 +251,8 @@ class Mapper
         }
 
         if (empty($this->parsers[$settings['destination']])) {
-            $this->parsers[$settings['destination']] = new static($settings['tableMapping'], $settings['destination']);
+            $this->parsers[$settings['destination']] =
+                new static($settings['tableMapping'], $this->writeHeader, $settings['destination']);
         }
         return $this->parsers[$settings['destination']];
     }
@@ -256,7 +260,7 @@ class Mapper
     protected function getResultFile()
     {
         if (empty($this->result)) {
-            $this->result = Table::create($this->type, $this->getHeader());
+            $this->result = new Table($this->type, $this->getHeader(), $this->writeHeader);
             $this->result->setPrimaryKey(array_values($this->getPrimaryKey()));
         }
 
