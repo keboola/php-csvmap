@@ -253,7 +253,7 @@ class MapperTest extends TestCase
         ];
 
         $data = [
-            (object) [
+            (object)[
                 'id' => 1
             ]
         ];
@@ -281,11 +281,11 @@ class MapperTest extends TestCase
         ];
 
         $data = [
-            (object) [
+            (object)[
                 'id' => 1,
                 'str' => 'asdf'
             ],
-            (object) [
+            (object)[
                 'id' => 2
             ]
         ];
@@ -486,7 +486,7 @@ class MapperTest extends TestCase
             ],
             file($result['root']->getPathName())
         );
-        $this->assertEquals(['id','userCol'], $result['root']->getPrimaryKey(true));
+        $this->assertEquals(['id', 'userCol'], $result['root']->getPrimaryKey(true));
 
         $this->assertEquals(
             [
@@ -691,13 +691,13 @@ class MapperTest extends TestCase
     public function testChildSameParser()
     {
         $data = [
-            (object) [
+            (object)[
                 'id' => 1,
-                'child' => (object) [
+                'child' => (object)[
                     'id' => 1.1
                 ],
                 'arrChild' => [ // redundant?
-                    (object) ['id' => '1.2']
+                    (object)['id' => '1.2']
                 ]
             ]
         ];
@@ -747,7 +747,7 @@ class MapperTest extends TestCase
         ];
 
         $data = [
-            (object) [
+            (object)[
                 'arr' => [
                     'one', 'two'
                 ]
@@ -801,13 +801,13 @@ class MapperTest extends TestCase
         ];
 
         $data = [
-            (object) [
+            (object)[
                 'id' => 1,
                 'child' => [
-                    (object) [
+                    (object)[
                         'id' => 2,
                         'grandchild' => [
-                            (object) [
+                            (object)[
                                 'id' => 3
                             ]
                         ]
@@ -819,7 +819,7 @@ class MapperTest extends TestCase
         $parser = new Mapper($config);
         $parser->parse($data);
 
-        $this->assertEquals(['root','child','grandchild'], array_keys($parser->getCsvFiles()));
+        $this->assertEquals(['root', 'child', 'grandchild'], array_keys($parser->getCsvFiles()));
     }
 
     public function testMixedDataError()
@@ -969,17 +969,75 @@ class MapperTest extends TestCase
         $this->assertEquals(['id', 'time'], $file->getHeader());
     }
 
+    public function testScalarArrayToSeparatedTable(): void
+    {
+        $mapping = [
+            'id' => [
+                'type' => 'column',
+                'mapping' => [
+                    'destination' => 'id',
+                    'primaryKey' => true,
+                ]
+
+            ],
+            "title" => "title",
+            'actors' => [
+                'type' => 'table',
+                'destination' => 'actor',
+                'tableMapping' => [
+                    '' => 'name' // <<<<< empty string means "self"
+                ]
+            ],
+        ];
+
+        $data = [
+            ["id" => 1, "title" => 'Rush', "actors" => ["Daniel Bruhl", "Chris Hemsworth", "Olivia Wilde"]],
+            ["id" => 2, "title" => 'Prisoners', "actors" => ["Hugh Jackman", "Jake Gyllenhaal", "Viola Davis"]],
+            ["id" => 3, "title" => 'Insidious 2', "actors" => ["Patrick Wilson", "Rose Byrne", "Barbara Hershey"]]
+        ];
+
+        $parser = new Mapper($mapping);
+        $parser->parse($data);
+
+        $files = $parser->getCsvFiles();
+        $this->assertCount(2, $files);
+
+        // Check root file
+        $expectedRoot = [
+            '"id","title"' . PHP_EOL,
+            '"1","Rush"' . PHP_EOL,
+            '"2","Prisoners"' . PHP_EOL,
+            '"3","Insidious 2"' . PHP_EOL
+        ];
+        $this->assertEquals($expectedRoot, file($files['root']->getPathName()));
+
+        // Check actors file
+        $expectedActor = [
+            '"name","root_pk"' . PHP_EOL,
+            '"Daniel Bruhl","1"' . PHP_EOL,
+            '"Chris Hemsworth","1"' . PHP_EOL,
+            '"Olivia Wilde","1"' . PHP_EOL,
+            '"Hugh Jackman","2"' . PHP_EOL,
+            '"Jake Gyllenhaal","2"' . PHP_EOL,
+            '"Viola Davis","2"' . PHP_EOL,
+            '"Patrick Wilson","3"' . PHP_EOL,
+            '"Rose Byrne","3"' . PHP_EOL,
+            '"Barbara Hershey","3"' . PHP_EOL,
+        ];
+        $this->assertEquals($expectedActor, file($files['actor']->getPathName()));
+    }
+
     protected function getMixedData()
     {
         return [
-            (object) [
+            (object)[
                 'id' => 1,
                 'arr' => [
                     1.1,
                     1.2
                 ]
             ],
-            (object) [ // poor data
+            (object)[ // poor data
                 'id' => 2,
                 'arr' => 2.1
             ]
@@ -989,23 +1047,23 @@ class MapperTest extends TestCase
     protected function getSampleData()
     {
         return [
-            (object) [
+            (object)[
                 'timestamp' => 1234567890,
                 'id' => 1,
                 'text' => 'asdf',
-                'user' => (object) [
+                'user' => (object)[
                     'id' => 123,
                     'username' => 'alois'
                 ],
                 'reactions' => [
-                    (object) [
-                        'user' => (object) [
+                    (object)[
+                        'user' => (object)[
                             'id' => 456,
                             'username' => 'jose'
                         ]
                     ],
-                    (object) [
-                        'user' => (object) [
+                    (object)[
+                        'user' => (object)[
                             'id' => 789,
                             'username' => 'mike'
                         ]

@@ -6,6 +6,7 @@ use Keboola\CsvTable\Table;
 use Keboola\Csv\Exception as CsvException;
 use Keboola\CsvMap\Exception\BadConfigException;
 use Keboola\CsvMap\Exception\BadDataException;
+use function Keboola\Utils\getDataFromPath;
 
 class Mapper
 {
@@ -70,43 +71,55 @@ class Mapper
         }
     }
 
-    /**
-     * @param array $data
-     */
     public function parse(array $data, array $userData = [])
     {
-        $file = $this->getResultFile();
+        // Create a file, even if there is no data
+        $this->getResultFile();
+
         foreach ($data as $row) {
-            $parsedRow = $this->parseRow($row, $userData);
-
-            try {
-                $file->writeRow($parsedRow);
-            } catch (CsvException $e) {
-                if ($e->getCode() != 3) {
-                    throw $e;
-                }
-
-                $columns = [];
-                foreach ($parsedRow as $key => $value) {
-                    if (!is_scalar($value) && !is_null($value)) {
-                        $columns[$key] = gettype($value);
-                    }
-                }
-                $badCols = join(',', array_keys($columns));
-
-                $exception = new BadDataException("Error writing '{$badCols}' column: " . $e->getMessage(), 0, $e);
-                $exception->setData(['bad_columns' => $columns]);
-                throw $exception;
-            }
+            $this->parseRow($row, $userData);
         }
     }
 
-    protected function parseRow($row, array $userData)
+    /**
+     * @param object|mixed $row
+     */
+    public function parseRow($row, array $userData = [])
+    {
+        $file = $this->getResultFile();
+        $mappedRow = $this->mapRow($row, $userData);
+
+        try {
+            $file->writeRow($mappedRow);
+        } catch (CsvException $e) {
+            if ($e->getCode() != 3) {
+                throw $e;
+            }
+
+            $columns = [];
+            foreach ($mappedRow as $key => $value) {
+                if (!is_scalar($value) && !is_null($value)) {
+                    $columns[$key] = gettype($value);
+                }
+            }
+            $badCols = join(',', array_keys($columns));
+
+            $exception = new BadDataException("Error writing '{$badCols}' column: " . $e->getMessage(), 0, $e);
+            $exception->setData(['bad_columns' => $columns]);
+            throw $exception;
+        }
+    }
+
+    protected function mapRow($row, array $userData)
     {
         $result = [];
         foreach ($this->mapping as $key => $settings) {
             $delimiter = empty($settings['delimiter']) ? '.' : $settings['delimiter'];
-            $propertyValue = \Keboola\Utils\getDataFromPath($key, $row, $delimiter);
+            // Empty key means "self", ... it is useful to map scalar array values
+            // Eg. row = {"actors":["Patrick Wilson","Rose Byrne","Barbara Hershey"]}
+            //     mapping = {"actors: {"type": "table", "destination": "actor", "tableMapping": {"": "name:} }
+            $propertyValue = $key === '' && is_scalar($row) ? $row : getDataFromPath($key, $row, $delimiter);
+
             if (empty($settings['type'])) {
                 $settings['type'] = 'column';
             }
