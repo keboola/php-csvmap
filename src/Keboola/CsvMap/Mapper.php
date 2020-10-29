@@ -6,6 +6,7 @@ use Keboola\CsvTable\Table;
 use Keboola\Csv\Exception as CsvException;
 use Keboola\CsvMap\Exception\BadConfigException;
 use Keboola\CsvMap\Exception\BadDataException;
+use function Keboola\Utils\getDataFromPath;
 
 class Mapper
 {
@@ -106,7 +107,11 @@ class Mapper
         $result = [];
         foreach ($this->mapping as $key => $settings) {
             $delimiter = empty($settings['delimiter']) ? '.' : $settings['delimiter'];
-            $propertyValue = \Keboola\Utils\getDataFromPath($key, $row, $delimiter);
+            // Empty key means "self", ... it is useful to map scalar array values
+            // Eg. row = {"actors":["Patrick Wilson","Rose Byrne","Barbara Hershey"]}
+            //     mapping = {"actors: {"type": "table", "destination": "actor", "tableMapping": {"": "name:} }
+            $propertyValue = $key === '' && is_scalar($row) ? $row : getDataFromPath($key, $row, $delimiter);
+
             if (empty($settings['type'])) {
                 $settings['type'] = 'column';
             }
