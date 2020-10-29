@@ -137,8 +137,8 @@ If the `destination` is the same as the current parsed 'type' (destination of th
 For example, we have this data:
 ```
 [
-    ['id' => 1, 'name' => 'dog', 'tags' => ['useful', 'pet', 'animal']]
-    ['id' => 2, 'name' => 'mouse', 'tags' => ['harmful', 'animal']],
+    ['id' => 1, 'name' => 'dog', 'tags' => ['useful', 'pet', 'animal']],
+    ['id' => 2, 'name' => 'mouse', 'tags' => ['harmful', 'animal']]
 ]
 ```
 
