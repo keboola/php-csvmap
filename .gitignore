@@ -7,3 +7,4 @@ vendor
 parameters.yml
 composer.phar
 composer.lock
+.phpunit.result.cache
