@@ -376,11 +376,6 @@ parameters:
 			path: tests/Keboola/CsvMap/MapperTest.php
 
 		-
-			message: "#^Parameter \\#1 \\$data of method Keboola\\\\CsvMap\\\\Mapper\\:\\:parse\\(\\) expects array, mixed given\\.$#"
-			count: 1
-			path: tests/Keboola/CsvMap/MapperTest.php
-
-		-
 			message: "#^Method Keboola\\\\CsvMap\\\\MapperWrongPathTest\\:\\:getSampleDataMulti\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: tests/Keboola/CsvMap/MapperWrongPathTest.php
