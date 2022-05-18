@@ -1,51 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\CsvMap;
 
-use Keboola\CsvTable\Table;
 use Keboola\Csv\Exception as CsvException;
 use Keboola\CsvMap\Exception\BadConfigException;
 use Keboola\CsvMap\Exception\BadDataException;
+use Keboola\CsvTable\Table;
 use function Keboola\Utils\getDataFromPath;
 
-class Mapper
+final class Mapper
 {
     /**
-     * @var array
+     * @var array<string, array<string, mixed>|string>
      */
-    protected $mapping;
+    protected array $mapping;
 
-    /**
-     * @var bool
-     */
-    protected $writeHeader;
+    protected bool $writeHeader;
 
-    /**
-     * @var string
-     */
-    protected $type;
+    protected string $type;
 
-    /**
-     * @var Table
-     */
-    protected $result;
+    protected Table $result;
 
     /**
      * @var Mapper[]
      */
-    protected $parsers = [];
+    protected array $parsers = [];
 
     /**
-     * @var array
+     * @var array<string, string>
      */
-    protected $parentKey;
+    protected array $parentKey;
+
+    protected string $parentPK;
 
     /**
-     * @var string
+     * @param array<string, array<string, mixed>|string> $mapping
      */
-    protected $parentPK;
-
-    public function __construct(array $mapping, bool $writeHeader = true, $type = 'root')
+    public function __construct(array $mapping, bool $writeHeader = true, string $type = 'root')
     {
         $this->mapping = $mapping;
         $this->writeHeader = $writeHeader;
@@ -57,21 +50,29 @@ class Mapper
     /**
      * Expands shorthand definitions to theirs full definition
      */
-    private function expandShorthandDefinitions()
+    private function expandShorthandDefinitions(): void
     {
         foreach ($this->mapping as $key => $settings) {
             if (is_string($key) && is_string($settings)) {
                 $this->mapping[$key] = [
                     'type' => 'column',
                     'mapping' => [
-                        'destination' => $settings
-                    ]
+                        'destination' => $settings,
+                    ],
                 ];
             }
         }
     }
 
-    public function parse(array $data, array $userData = [])
+    /**
+     * @param array<int, array<string, mixed>|object> $data
+     * @param array<string, mixed> $userData
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\Utils\Exception
+     */
+    public function parse(array $data, array $userData = []): void
     {
         // Create a file, even if there is no data
         $this->getResultFile();
@@ -82,9 +83,13 @@ class Mapper
     }
 
     /**
-     * @param object|mixed $row
+     * @param array<string, mixed> $userData
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\Utils\Exception
      */
-    public function parseRow($row, array $userData = [])
+    public function parseRow(mixed $row, array $userData = []): void
     {
         $file = $this->getResultFile();
         $mappedRow = $this->mapRow($row, $userData);
@@ -92,7 +97,7 @@ class Mapper
         try {
             $file->writeRow($mappedRow);
         } catch (CsvException $e) {
-            if ($e->getCode() != 3) {
+            if ($e->getCode() !== 3) {
                 throw $e;
             }
 
@@ -104,71 +109,81 @@ class Mapper
             }
             $badCols = join(',', array_keys($columns));
 
-            $exception = new BadDataException("Error writing '{$badCols}' column: " . $e->getMessage(), 0, $e);
+            $exception = new BadDataException("Error writing '$badCols' column: " . $e->getMessage(), 0, $e);
             $exception->setData(['bad_columns' => $columns]);
             throw $exception;
         }
     }
 
-    protected function mapRow($row, array $userData)
+    /**
+     * @param array<string, mixed> $userData
+     * @return array<int|string, mixed>
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\Utils\Exception
+     */
+    protected function mapRow(mixed $row, array $userData): array
     {
         $result = [];
         foreach ($this->mapping as $key => $settings) {
-            $delimiter = empty($settings['delimiter']) ? '.' : $settings['delimiter'];
+            $delimiter = empty($settings['delimiter']) ? '.' : (string) $settings['delimiter'];
             // Empty key means "self", ... it is useful to map scalar array values
             // Eg. row = {"actors":["Patrick Wilson","Rose Byrne","Barbara Hershey"]}
             //     mapping = {"actors: {"type": "table", "destination": "actor", "tableMapping": {"": "name:} }
-            $propertyValue = $key === '' && is_scalar($row) ? $row : getDataFromPath($key, $row, $delimiter);
+            $propertyValue = is_object($row) || is_array($row) ? getDataFromPath($key, $row, $delimiter) : $row;
 
-            if (empty($settings['type'])) {
-                $settings['type'] = 'column';
-            }
-            switch ($settings['type']) {
-                case 'table':
-                    $tableParser = $this->getParser($settings, $key);
+            if (is_array($settings)) {
+                if (empty($settings['type'])) {
+                    $settings['type'] = 'column';
+                }
+                switch ($settings['type']) {
+                    case 'table':
+                        $tableParser = $this->getParser($settings, $key);
 
-                    if (empty($this->getPrimaryKey()) && empty($propertyValue)) {
+                        if (empty($this->getPrimaryKey()) && empty($propertyValue)) {
+                            if (empty($settings['parentKey']['disable'])) {
+                                $result[$settings['destination']] = null;
+                            }
+                            break;
+                        }
+
+                        $primaryKeyValue = $this->getPrimaryKeyValues($row, $userData);
+                        $this->checkPrimaryKeyValues($primaryKeyValue);
+
                         if (empty($settings['parentKey']['disable'])) {
-                            $result[$settings['destination']] = null;
+                            if (empty($this->getPrimaryKey())) {
+                                $result[$settings['destination']] = join(',', $primaryKeyValue);
+                            }
+                            $parentKeyCol = empty($settings['parentKey']['destination'])
+                                ? $this->type . '_pk'
+                                : $settings['parentKey']['destination'];
+
+                            $tableParser->setParentKey($primaryKeyValue, $parentKeyCol);
+                            if (!empty($settings['parentKey']['primaryKey'])) {
+                                $tableParser->addParentPK($parentKeyCol);
+                            }
                         }
+
+                        // If propertyValue != array, wrap it
+                        if (!is_array($propertyValue)) {
+                            $propertyValue = [$propertyValue];
+                        }
+                        $tableParser->parse($propertyValue, $userData);
+
                         break;
-                    }
-
-                    $primaryKeyValue = $this->getPrimaryKeyValues($row, $userData);
-                    $this->checkPrimaryKeyValues($primaryKeyValue);
-
-                    if (empty($settings['parentKey']['disable'])) {
-                        if (empty($this->getPrimaryKey())) {
-                            $result[$settings['destination']] = join(',', $primaryKeyValue);
+                    case 'user':
+                        $result[$settings['mapping']['destination']] = getDataFromPath($key, $userData);
+                        break;
+                    case 'column':
+                    default:
+                        if (!is_scalar($propertyValue) && !is_null($propertyValue) && !empty($settings['forceType'])) {
+                            $propertyValue = json_encode($propertyValue);
                         }
-                        $parentKeyCol = empty($settings['parentKey']['destination'])
-                            ? $this->type . '_pk'
-                            : $settings['parentKey']['destination'];
 
-                        $tableParser->setParentKey($primaryKeyValue, $parentKeyCol);
-                        if (!empty($settings['parentKey']['primaryKey'])) {
-                            $tableParser->addParentPK($parentKeyCol);
-                        }
-                    }
-
-                    // If propertyValue != array, wrap it
-                    if (!is_array($propertyValue)) {
-                        $propertyValue = [$propertyValue];
-                    }
-                    $tableParser->parse($propertyValue, $userData);
-
-                    break;
-                case 'user':
-                    $result[$settings['mapping']['destination']] = \Keboola\Utils\getDataFromPath($key, $userData);
-                    break;
-                case 'column':
-                default:
-                    if (!is_scalar($propertyValue) && !is_null($propertyValue) && !empty($settings['forceType'])) {
-                        $propertyValue = json_encode($propertyValue);
-                    }
-
-                    $result[$settings['mapping']['destination']] = $propertyValue;
-                    break;
+                        $result[$settings['mapping']['destination']] = $propertyValue;
+                        break;
+                }
             }
         }
         if (!empty($this->parentKey)) {
@@ -178,7 +193,11 @@ class Mapper
         return $result;
     }
 
-    private function checkPrimaryKeyValues(array $values)
+    /**
+     * @param array<int, mixed> $values
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    private function checkPrimaryKeyValues(array $values): void
     {
         foreach ($values as $value) {
             if (!is_scalar($value) && !is_null($value)) {
@@ -189,7 +208,10 @@ class Mapper
         }
     }
 
-    public function getPrimaryKey()
+    /**
+     * @return array<string, mixed>
+     */
+    public function getPrimaryKey(): array
     {
         $primaryKey = [];
         foreach ($this->mapping as $path => $settings) {
@@ -204,7 +226,12 @@ class Mapper
         return $primaryKey;
     }
 
-    protected function getPrimaryKeyValues($row, array $userData)
+    /**
+     * @param array<string, mixed> $userData
+     * @return array<int, mixed>
+     * @throws \Keboola\Utils\Exception
+     */
+    protected function getPrimaryKeyValues(mixed $row, array $userData): array
     {
         $values = [];
         if (empty($this->getPrimaryKey())) {
@@ -215,13 +242,13 @@ class Mapper
             }
         } else {
             foreach ($this->getPrimaryKey() as $path => $column) {
-                if (!empty($this->parentKey) && $column == key($this->parentKey)) {
+                if (!empty($this->parentKey) && $column === key($this->parentKey)) {
                     $values[] = $this->parentKey[$column];
-                } elseif (!empty($this->mapping[$path]['type']) && $this->mapping[$path]['type'] == 'user') {
+                } elseif (!empty($this->mapping[$path]['type']) && $this->mapping[$path]['type'] === 'user') {
                     $values[] = $userData[$path];
                 } else {
                     $delimiter = empty($this->mapping[$path]['delimiter']) ? '.' : $this->mapping[$path]['delimiter'];
-                    $values[] = \Keboola\Utils\getDataFromPath($path, $row, $delimiter);
+                    $values[] = getDataFromPath($path, $row, $delimiter);
                 }
             }
         }
@@ -229,7 +256,10 @@ class Mapper
         return $values;
     }
 
-    public function setParentKey(array $keys, $colName)
+    /**
+     * @param array<int, string> $keys
+     */
+    public function setParentKey(array $keys, string $colName): void
     {
         $this->parentKey = [$colName => join(',', $keys)];
     }
@@ -237,17 +267,18 @@ class Mapper
     /**
      * Add parent identifier to PK
      */
-    public function addParentPK($colName)
+    public function addParentPK(string $colName): void
     {
         $this->parentPK = $colName;
     }
 
     /**
-     * @return static
+     * @param array<string, string|mixed> $settings
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
      */
-    protected function getParser(array $settings, $key)
+    protected function getParser(array $settings, string $key): Mapper
     {
-        if (!empty($settings['destination']) && $settings['destination'] == $this->type) {
+        if (!empty($settings['destination']) && $settings['destination'] === $this->type) {
             if (empty($settings['parentKey']['disable'])) {
                 throw new BadConfigException(
                     "'parentKey.disable' must be true to parse child values into parent's table"
@@ -259,18 +290,23 @@ class Mapper
 
         foreach (['tableMapping', 'destination'] as $requiredKey) {
             if (empty($settings[$requiredKey])) {
-                throw new BadConfigException("Key '{$requiredKey}' is not set for table '{$key}'.");
+                throw new BadConfigException("Key '$requiredKey' is not set for table '$key'.");
             }
         }
 
         if (empty($this->parsers[$settings['destination']])) {
             $this->parsers[$settings['destination']] =
-                new static($settings['tableMapping'], $this->writeHeader, $settings['destination']);
+                new self($settings['tableMapping'], $this->writeHeader, $settings['destination']);
         }
         return $this->parsers[$settings['destination']];
     }
 
-    protected function getResultFile()
+    /**
+     * @throws \Keboola\Csv\InvalidArgumentException
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    protected function getResultFile(): Table
     {
         if (empty($this->result)) {
             $this->result = new Table($this->type, $this->getHeader(), $this->writeHeader);
@@ -280,23 +316,27 @@ class Mapper
         return $this->result;
     }
 
-    protected function getHeader()
+    /**
+     * @return array<int, mixed>
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    protected function getHeader(): array
     {
         $header = [];
         foreach ($this->mapping as $key => $settings) {
             if (empty($settings['type'])
-                || $settings['type'] == 'column'
-                || $settings['type'] == 'user'
+                || $settings['type'] === 'column'
+                || $settings['type'] === 'user'
             ) {
                 if (empty($settings['mapping']['destination'])) {
-                    throw new BadConfigException("Key 'mapping.destination' is not set for column '{$key}'.");
+                    throw new BadConfigException("Key 'mapping.destination' is not set for column '$key'.");
                 }
 
                 $header[] = $settings['mapping']['destination'];
-            } elseif ($settings['type'] == 'table' && empty($this->getPrimaryKey())) {
+            } elseif ($settings['type'] === 'table' && empty($this->getPrimaryKey())) {
                 // TODO child table link to generate
                 if (empty($settings['destination'])) {
-                    throw new BadConfigException("Key 'destination' is not set for table '{$key}'.");
+                    throw new BadConfigException("Key 'destination' is not set for table '$key'.");
                 }
 
                 if (empty($settings['parentKey']['disable'])) {
@@ -312,22 +352,23 @@ class Mapper
 
     /**
      * Return own result and all children
-     * @return Table[]
+     * @return array<string, Table>
+     * @throws \Keboola\Csv\InvalidArgumentException
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
      */
-    public function getCsvFiles()
+    public function getCsvFiles(): array
     {
         $childResults = [];
-        foreach ($this->parsers as $type => $parser) {
+        foreach ($this->parsers as $parser) {
             $childResults += $parser->getCsvFiles();
         }
 
-        $results = array_merge(
+        return array_merge(
             [
-                $this->type => $this->result
+                $this->type => $this->getResultFile(),
             ],
             $childResults
         );
-
-        return $results;
     }
 }

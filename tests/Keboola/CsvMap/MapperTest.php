@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\CsvMap;
 
 use Keboola\CsvMap\Exception\BadConfigException;
@@ -8,27 +10,33 @@ use PHPUnit\Framework\TestCase;
 
 class MapperTest extends TestCase
 {
-    public function testParse()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testParse(): void
     {
         $config = [
             'timestamp' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'timestamp'
-                ]
+                    'destination' => 'timestamp',
+                ],
             ],
             'id' => [
                 'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'user.id' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'user_id'
-                ]
+                    'destination' => 'user_id',
+                ],
             ],
             'reactions' => [
                 'type' => 'table',
@@ -37,17 +45,17 @@ class MapperTest extends TestCase
                     'user/id' => [
                         'type' => 'column',
                         'mapping' => [
-                            'destination' => 'user_id'
+                            'destination' => 'user_id',
                         ],
-                        'delimiter' => '/'
-                    ]
+                        'delimiter' => '/',
+                    ],
                 ],
 //                 'parentKey' => [
 //                     'primaryKey' => true,
 //                     //'columns' => ['id', 'user_id'],
 //                     //'hash' => true
 //                 ]
-            ]
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -62,26 +70,32 @@ class MapperTest extends TestCase
         }
     }
 
-    public function testParseNoPK()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParseNoPK(): void
     {
         $config = [
             'timestamp' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'timestamp'
-                ]
+                    'destination' => 'timestamp',
+                ],
             ],
             'id' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'post_id'
-                ]
+                    'destination' => 'post_id',
+                ],
             ],
             'user.id' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'user_id'
-                ]
+                    'destination' => 'user_id',
+                ],
             ],
             'reactions' => [
                 'type' => 'table',
@@ -90,11 +104,11 @@ class MapperTest extends TestCase
                     'user.id' => [
                         'type' => 'column',
                         'mapping' => [
-                            'destination' => 'user_id'
-                        ]
-                    ]
-                ]
-            ]
+                            'destination' => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -109,28 +123,34 @@ class MapperTest extends TestCase
         }
     }
 
-    public function testParseCompositePK()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParseCompositePK(): void
     {
         $config = [
             'timestamp' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'timestamp'
-                ]
+                    'destination' => 'timestamp',
+                ],
             ],
             'id' => [
                 'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'user.id' => [
                 'type' => 'column',
                 'mapping' => [
                     'destination' => 'user_id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'reactions' => [
                 'type' => 'table',
@@ -139,11 +159,11 @@ class MapperTest extends TestCase
                     'user.id' => [
                         'type' => 'column',
                         'mapping' => [
-                            'destination' => 'user_id'
-                        ]
-                    ]
-                ]
-            ]
+                            'destination' => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -157,15 +177,21 @@ class MapperTest extends TestCase
         }
     }
 
-    public function testParentKeyPK()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParentKeyPK(): void
     {
         $config = [
             'id' => [
                 'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'reactions' => [
                 'type' => 'table',
@@ -175,14 +201,14 @@ class MapperTest extends TestCase
                         'type' => 'column',
                         'mapping' => [
                             'destination' => 'user_id',
-                            'primaryKey' => true
-                        ]
-                    ]
+                            'primaryKey' => true,
+                        ],
+                    ],
                 ],
                 'parentKey' => [
-                    'primaryKey' => true
-                ]
-            ]
+                    'primaryKey' => true,
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -194,15 +220,21 @@ class MapperTest extends TestCase
         $this->assertEquals(['user_id', 'root_pk'], $result['post_reactions']->getPrimaryKey(true));
     }
 
-    public function testParentKeyDestination()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParentKeyDestination(): void
     {
         $config = [
             'id' => [
                 'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'reactions' => [
                 'type' => 'table',
@@ -212,14 +244,14 @@ class MapperTest extends TestCase
                         'type' => 'column',
                         'mapping' => [
                             'destination' => 'user_id',
-                            'primaryKey' => true
-                        ]
-                    ]
+                            'primaryKey' => true,
+                        ],
+                    ],
                 ],
                 'parentKey' => [
-                    'destination' => 'post_id'
-                ]
-            ]
+                    'destination' => 'post_id',
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -228,16 +260,26 @@ class MapperTest extends TestCase
         $parser->parse($data);
         $result = $parser->getCsvFiles();
 
-        $this->assertEquals('"user_id","post_id"' . PHP_EOL, file($result['post_reactions']->getPathName())[0]);
+        $file = file($result['post_reactions']->getPathName());
+        if ($file === false) {
+            $this->fail();
+        }
+        $this->assertEquals('"user_id","post_id"' . PHP_EOL, $file[0]);
     }
 
-    public function testEmptyArray()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testEmptyArray(): void
     {
         $config = [
             'id' => [
                 'mapping' => [
-                    'destination' => 'id'
-                ]
+                    'destination' => 'id',
+                ],
             ],
             'arr' => [
                 'type' => 'table',
@@ -245,17 +287,17 @@ class MapperTest extends TestCase
                 'tableMapping' => [
                     'child_id' => [
                         'mapping' => [
-                            'destination' => 'child_id'
-                        ]
-                    ]
-                ]
-            ]
+                            'destination' => 'child_id',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $data = [
-            (object)[
-                'id' => 1
-            ]
+            (object) [
+                'id' => 1,
+            ],
         ];
 
         $parser = new Mapper($config);
@@ -265,29 +307,35 @@ class MapperTest extends TestCase
         $this->assertEquals(['"id","children"' . PHP_EOL, '"1",""' . PHP_EOL], file($result['root']->getPathName()));
     }
 
-    public function testEmptyString()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testEmptyString(): void
     {
         $config = [
             'id' => [
                 'mapping' => [
-                    'destination' => 'id'
-                ]
+                    'destination' => 'id',
+                ],
             ],
             'str' => [
                 'mapping' => [
-                    'destination' => 'text'
-                ]
-            ]
+                    'destination' => 'text',
+                ],
+            ],
         ];
 
         $data = [
-            (object)[
+            (object) [
                 'id' => 1,
-                'str' => 'asdf'
+                'str' => 'asdf',
             ],
-            (object)[
-                'id' => 2
-            ]
+            (object) [
+                'id' => 2,
+            ],
         ];
 
         $parser = new Mapper($config);
@@ -298,34 +346,40 @@ class MapperTest extends TestCase
             [
                 '"id","text"' . PHP_EOL,
                 '"1","asdf"' . PHP_EOL,
-                '"2",""' . PHP_EOL
+                '"2",""' . PHP_EOL,
             ],
             file($result['root']->getPathName())
         );
     }
 
-    public function testPrimaryKey()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testPrimaryKey(): void
     {
         $config = [
             'timestamp' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'timestamp'
-                ]
+                    'destination' => 'timestamp',
+                ],
             ],
             'id' => [
                 'type' => 'column',
                 'mapping' => [
                     'destination' => 'post_id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'user.id' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'user_id'
-                ]
-            ]
+                    'destination' => 'user_id',
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -337,13 +391,18 @@ class MapperTest extends TestCase
         $this->assertEquals(['post_id'], $result['root']->getPrimaryKey(true));
     }
 
-    public function testNoMappingKeyColumn()
+    /**
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testNoMappingKeyColumn(): void
     {
 
         $config = [
             'timestamp' => [
-                'type' => 'column'
-            ]
+                'type' => 'column',
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -355,13 +414,18 @@ class MapperTest extends TestCase
         $parser->parse($data);
     }
 
-    public function testNoDestinationTable()
+    /**
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testNoDestinationTable(): void
     {
 
         $config = [
             'arr' => [
-                'type' => 'table'
-            ]
+                'type' => 'table',
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -372,13 +436,18 @@ class MapperTest extends TestCase
         $parser->parse($data);
     }
 
-    public function testNoTableMapping()
+    /**
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testNoTableMapping(): void
     {
         $config = [
             'reactions' => [
                 'type' => 'table',
-                'destination' => 'children'
-            ]
+                'destination' => 'children',
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -389,7 +458,12 @@ class MapperTest extends TestCase
         $parser->parse($data);
     }
 
-    public function testNoDestinationNestedTable()
+    /**
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testNoDestinationNestedTable(): void
     {
         $config = [
             'reactions' => [
@@ -397,11 +471,11 @@ class MapperTest extends TestCase
                 'tableMapping' => [
                     'child_id' => [
                         'mapping' => [
-                            'destination' => 'child_id'
-                        ]
-                    ]
-                ]
-            ]
+                            'destination' => 'child_id',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -412,20 +486,26 @@ class MapperTest extends TestCase
         $parser->parse($data);
     }
 
-    public function testDataInjection()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testDataInjection(): void
     {
         $config = [
             'id' => [
                 'mapping' => [
-                    'destination' => 'id'
-                ]
+                    'destination' => 'id',
+                ],
             ],
             'userData' => [
                 'type' => 'user',
                 'mapping' => [
-                    'destination' => 'userCol'
-                ]
-            ]
+                    'destination' => 'userCol',
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -437,20 +517,26 @@ class MapperTest extends TestCase
         $this->assertEquals(
             [
                 '"id","userCol"' . PHP_EOL,
-                '"1","blah"' . PHP_EOL
+                '"1","blah"' . PHP_EOL,
             ],
             file($result['root']->getPathName())
         );
     }
 
-    public function testDataInjectionPK()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testDataInjectionPK(): void
     {
         $config = [
             'id' => [
                 'mapping' => [
                     'destination' => 'id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'reactions' => [
                 'type' => 'table',
@@ -459,18 +545,18 @@ class MapperTest extends TestCase
                     'user.id' => [
                         'type' => 'column',
                         'mapping' => [
-                            'destination' => 'user_id'
-                        ]
-                    ]
-                ]
+                            'destination' => 'user_id',
+                        ],
+                    ],
+                ],
             ],
             'userData' => [
                 'type' => 'user',
                 'mapping' => [
                     'destination' => 'userCol',
-                    'primaryKey' => true
-                ]
-            ]
+                    'primaryKey' => true,
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -482,7 +568,7 @@ class MapperTest extends TestCase
         $this->assertEquals(
             [
                 '"id","userCol"' . PHP_EOL,
-                '"1","blah"' . PHP_EOL
+                '"1","blah"' . PHP_EOL,
             ],
             file($result['root']->getPathName())
         );
@@ -492,26 +578,32 @@ class MapperTest extends TestCase
             [
                 '"user_id","root_pk"' . PHP_EOL,
                 '"456","1,blah"' . PHP_EOL,
-                '"789","1,blah"' . PHP_EOL
+                '"789","1,blah"' . PHP_EOL,
             ],
             file($result['post_reactions']->getPathName())
         );
     }
 
-    public function testDataInjectionNoData()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testDataInjectionNoData(): void
     {
         $config = [
             'id' => [
                 'mapping' => [
-                    'destination' => 'id'
-                ]
+                    'destination' => 'id',
+                ],
             ],
             'userData' => [
                 'type' => 'user',
                 'mapping' => [
-                    'destination' => 'userCol'
-                ]
-            ]
+                    'destination' => 'userCol',
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -523,21 +615,27 @@ class MapperTest extends TestCase
         $this->assertEquals(
             [
                 '"id","userCol"' . PHP_EOL,
-                '"1",""' . PHP_EOL
+                '"1",""' . PHP_EOL,
             ],
             file($result['root']->getPathName())
         );
     }
 
-    public function testUserDataPropagation()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testUserDataPropagation(): void
     {
         $data = $this->getSampleData();
 
         $config = [
             'id' => [
                 'mapping' => [
-                    'destination' => 'id'
-                ]
+                    'destination' => 'id',
+                ],
             ],
             'user' => [
                 'type' => 'table',
@@ -546,36 +644,36 @@ class MapperTest extends TestCase
                     'id' => [
                         'mapping' => [
                             'destination' => 'id',
-                            'primaryKey' => true
-                        ]
+                            'primaryKey' => true,
+                        ],
                     ],
                     'username' => [
                         'mapping' => [
-                            'destination' => 'username'
-                        ]
+                            'destination' => 'username',
+                        ],
                     ],
                     'keboola_source' => [
                         'type' => 'user',
                         'mapping' => [
-                            'destination' => 'keboola_source'
-                        ]
-                    ]
+                            'destination' => 'keboola_source',
+                        ],
+                    ],
                 ],
                 'parentKey' => [
-                    'disable' => true
-                ]
+                    'disable' => true,
+                ],
             ],
             'user.id' => [
                 'mapping' => [
-                    'destination' => 'user_id'
-                ]
+                    'destination' => 'user_id',
+                ],
             ],
             'keboola_source' => [
                 'type' => 'user',
                 'mapping' => [
-                    'destination' => 'keboola_source'
-                ]
-            ]
+                    'destination' => 'keboola_source',
+                ],
+            ],
         ];
 
         $parser = new Mapper($config);
@@ -586,23 +684,29 @@ class MapperTest extends TestCase
 
         $this->assertEquals([
             '"id","user_id","keboola_source"' . PHP_EOL,
-            '"1","123","search"' . PHP_EOL
+            '"1","123","search"' . PHP_EOL,
         ], file($result['root']->getPathName()));
         $this->assertEquals([
             '"id","username","keboola_source"' . PHP_EOL,
-            '"123","alois","search"' . PHP_EOL
+            '"123","alois","search"' . PHP_EOL,
         ], file($result['users']->getPathName()));
     }
 
-    public function testObjectToTable()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testObjectToTable(): void
     {
         $data = $this->getSampleData();
 
         $config = [
             'id' => [
                 'mapping' => [
-                    'destination' => 'id'
-                ]
+                    'destination' => 'id',
+                ],
             ],
             'user' => [
                 'type' => 'table',
@@ -611,24 +715,24 @@ class MapperTest extends TestCase
                     'id' => [
                         'mapping' => [
                             'destination' => 'id',
-                            'primaryKey' => true
-                        ]
+                            'primaryKey' => true,
+                        ],
                     ],
                     'username' => [
                         'mapping' => [
-                            'destination' => 'username'
-                        ]
-                    ]
+                            'destination' => 'username',
+                        ],
+                    ],
                 ],
                 'parentKey' => [
-                    'disable' => true
-                ]
+                    'disable' => true,
+                ],
             ],
             'user.id' => [
                 'mapping' => [
-                    'destination' => 'user_id'
-                ]
-            ]
+                    'destination' => 'user_id',
+                ],
+            ],
         ];
 
         $parser = new Mapper($config);
@@ -645,15 +749,21 @@ class MapperTest extends TestCase
         );
     }
 
-    public function testDisableParentKey()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testDisableParentKey(): void
     {
 
         $config = [
             'id' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'post_id'
-                ]
+                    'destination' => 'post_id',
+                ],
             ],
             'reactions' => [
                 'type' => 'table',
@@ -662,14 +772,14 @@ class MapperTest extends TestCase
                     'user.id' => [
                         'type' => 'column',
                         'mapping' => [
-                            'destination' => 'user_id'
-                        ]
-                    ]
+                            'destination' => 'user_id',
+                        ],
+                    ],
                 ],
                 'parentKey' => [
-                    'disable' => true
-                ]
-            ]
+                    'disable' => true,
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -680,48 +790,54 @@ class MapperTest extends TestCase
 
         $this->assertEquals([
             '"post_id"' . PHP_EOL,
-            '"1"' . PHP_EOL
+            '"1"' . PHP_EOL,
         ], file($result['root']->getPathName()));
         $this->assertEquals([
             '"user_id"' . PHP_EOL, '"456"' . PHP_EOL,
-            '"789"' . PHP_EOL
+            '"789"' . PHP_EOL,
         ], file($result['post_reactions']->getPathName()));
     }
 
-    public function testChildSameParser()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testChildSameParser(): void
     {
         $data = [
-            (object)[
+            (object) [
                 'id' => 1,
-                'child' => (object)[
-                    'id' => 1.1
+                'child' => (object) [
+                    'id' => 1.1,
                 ],
                 'arrChild' => [ // redundant?
-                    (object)['id' => '1.2']
-                ]
-            ]
+                    (object) ['id' => '1.2'],
+                ],
+            ],
         ];
 
         $config = [
             'id' => [
                 'mapping' => [
-                    'destination' => 'post_id'
-                ]
+                    'destination' => 'post_id',
+                ],
             ],
             'child' => [
                 'type' => 'table',
                 'destination' => 'items',
                 'parentKey' => [
-                    'disable' => true
-                ]
+                    'disable' => true,
+                ],
             ],
             'arrChild' => [
                 'type' => 'table',
                 'destination' => 'items',
                 'parentKey' => [
-                    'disable' => true
-                ]
-            ]
+                    'disable' => true,
+                ],
+            ],
         ];
 
         $parser = new Mapper($config, true, 'items');
@@ -732,26 +848,32 @@ class MapperTest extends TestCase
             '"post_id"' . PHP_EOL,
             '"1.1"' . PHP_EOL,
             '"1.2"' . PHP_EOL,
-            '"1"' . PHP_EOL
+            '"1"' . PHP_EOL,
         ], file($result['items']->getPathName()));
     }
 
-    public function testArrayItemToColumn()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testArrayItemToColumn(): void
     {
         $config = [
             'arr.0' => [
                 'mapping' => [
-                    'destination' => 'first_arr_item'
-                ]
-            ]
+                    'destination' => 'first_arr_item',
+                ],
+            ],
         ];
 
         $data = [
-            (object)[
+            (object) [
                 'arr' => [
-                    'one', 'two'
-                ]
-            ]
+                    'one', 'two',
+                ],
+            ],
         ];
 
         $parser = new Mapper($config);
@@ -763,14 +885,19 @@ class MapperTest extends TestCase
         );
     }
 
-    public function testObjectToColumnError()
+    /**
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testObjectToColumnError(): void
     {
         $config = [
             'user' => [
                 'mapping' => [
-                    'destination' => 'user'
-                ]
-            ]
+                    'destination' => 'user',
+                ],
+            ],
         ];
 
         $parser = new Mapper($config);
@@ -780,7 +907,13 @@ class MapperTest extends TestCase
         $parser->parse($this->getSampleData());
     }
 
-    public function testDeepNestedTable()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testDeepNestedTable(): void
     {
         $config = [
             'id' => 'id',
@@ -793,27 +926,27 @@ class MapperTest extends TestCase
                         'type' => 'table',
                         'destination' => 'grandchild',
                         'tableMapping' => [
-                            'id' => 'gcid'
-                        ]
-                    ]
-                ]
-            ]
+                            'id' => 'gcid',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $data = [
-            (object)[
+            (object) [
                 'id' => 1,
                 'child' => [
-                    (object)[
+                    (object) [
                         'id' => 2,
                         'grandchild' => [
-                            (object)[
-                                'id' => 3
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                            (object) [
+                                'id' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $parser = new Mapper($config);
@@ -822,16 +955,21 @@ class MapperTest extends TestCase
         $this->assertEquals(['root', 'child', 'grandchild'], array_keys($parser->getCsvFiles()));
     }
 
-    public function testMixedDataError()
+    /**
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testMixedDataError(): void
     {
         $config = [
             'id' => 'id',
             'arr' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'arrStr'
-                ]
-            ]
+                    'destination' => 'arrStr',
+                ],
+            ],
         ];
 
         $data = $this->getMixedData();
@@ -843,17 +981,23 @@ class MapperTest extends TestCase
         $parser->parse($data);
     }
 
-    public function testArrayToString()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testArrayToString(): void
     {
         $config = [
             'id' => 'id',
             'arr' => [
                 'type' => 'column',
                 'mapping' => [
-                    'destination' => 'str'
+                    'destination' => 'str',
                 ],
-                'forceType' => true
-            ]
+                'forceType' => true,
+            ],
         ];
 
         $data = $this->getMixedData();
@@ -864,29 +1008,35 @@ class MapperTest extends TestCase
         $expected = [
             '"id","str"' . PHP_EOL,
             '"1","[1.1,1.2]"' . PHP_EOL,
-            '"2","2.1"' . PHP_EOL
+            '"2","2.1"' . PHP_EOL,
         ];
 
         $this->assertEquals($expected, file($parser->getCsvFiles()['root']->getPathName()));
     }
 
-    public function testStringToArray()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testStringToArray(): void
     {
         $config = [
             'id' => [
                 'mapping' => [
                     'destination' => 'id',
-                    'primaryKey' => true
-                ]
+                    'primaryKey' => true,
+                ],
             ],
             'arr' => [
                 'type' => 'table',
                 'destination' => 'arr',
                 'tableMapping' => [
-                    '.' => 'data'
+                    '.' => 'data',
                 ],
-                'forceType' => true
-            ]
+                'forceType' => true,
+            ],
         ];
 
         $data = $this->getMixedData();
@@ -897,21 +1047,27 @@ class MapperTest extends TestCase
         $root = [
             '"id"' . PHP_EOL,
             '"1"' . PHP_EOL,
-            '"2"' . PHP_EOL
+            '"2"' . PHP_EOL,
         ];
 
         $arr = [
             '"data","root_pk"' . PHP_EOL,
             '"1.1","1"' . PHP_EOL,
             '"1.2","1"' . PHP_EOL,
-            '"2.1","2"' . PHP_EOL
+            '"2.1","2"' . PHP_EOL,
         ];
 
         $this->assertEquals($root, file($parser->getCsvFiles()['root']->getPathName()));
         $this->assertEquals($arr, file($parser->getCsvFiles()['arr']->getPathName()));
     }
 
-    public function testArrayToTable()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testArrayToTable(): void
     {
         $config = [
             'rows' => [
@@ -921,17 +1077,17 @@ class MapperTest extends TestCase
                     '0' => [
                         'type' => 'column',
                         'mapping' => [
-                            'destination' => 'date'
-                        ]
+                            'destination' => 'date',
+                        ],
                     ],
                     '1' => [
                         'type' => 'column',
                         'mapping' => [
-                            'destination' => 'clicks'
-                        ]
-                    ]
-                ]
-            ]
+                            'destination' => 'clicks',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $data = json_decode('[{
@@ -947,13 +1103,19 @@ class MapperTest extends TestCase
         $expected = [
             '"date","clicks","root_pk"' . PHP_EOL,
             '"2017-05-27","83008","20afe46b23b7afa04d50a036bc3b9021"' . PHP_EOL,
-            '"2017-05-28","105723","20afe46b23b7afa04d50a036bc3b9021"' . PHP_EOL
+            '"2017-05-28","105723","20afe46b23b7afa04d50a036bc3b9021"' . PHP_EOL,
         ];
 
         $this->assertEquals($expected, file($parser->getCsvFiles()['report-rows']->getPathName()));
     }
 
-    public function testDontWriteHeader()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testDontWriteHeader(): void
     {
         $mapping = [
             'id' => 'id',
@@ -969,6 +1131,12 @@ class MapperTest extends TestCase
         $this->assertEquals(['id', 'time'], $file->getHeader());
     }
 
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
     public function testScalarArrayToSeparatedTable(): void
     {
         $mapping = [
@@ -977,23 +1145,23 @@ class MapperTest extends TestCase
                 'mapping' => [
                     'destination' => 'id',
                     'primaryKey' => true,
-                ]
+                ],
 
             ],
-            "title" => "title",
+            'title' => 'title',
             'actors' => [
                 'type' => 'table',
                 'destination' => 'actor',
                 'tableMapping' => [
-                    '' => 'name' // <<<<< empty string means "self"
-                ]
+                    '' => 'name', // <<<<< empty string means "self"
+                ],
             ],
         ];
 
         $data = [
-            ["id" => 1, "title" => 'Rush', "actors" => ["Daniel Bruhl", "Chris Hemsworth", "Olivia Wilde"]],
-            ["id" => 2, "title" => 'Prisoners', "actors" => ["Hugh Jackman", "Jake Gyllenhaal", "Viola Davis"]],
-            ["id" => 3, "title" => 'Insidious 2', "actors" => ["Patrick Wilson", "Rose Byrne", "Barbara Hershey"]]
+            ['id' => 1, 'title' => 'Rush', 'actors' => ['Daniel Bruhl', 'Chris Hemsworth', 'Olivia Wilde']],
+            ['id' => 2, 'title' => 'Prisoners', 'actors' => ['Hugh Jackman', 'Jake Gyllenhaal', 'Viola Davis']],
+            ['id' => 3, 'title' => 'Insidious 2', 'actors' => ['Patrick Wilson', 'Rose Byrne', 'Barbara Hershey']],
         ];
 
         $parser = new Mapper($mapping);
@@ -1007,7 +1175,7 @@ class MapperTest extends TestCase
             '"id","title"' . PHP_EOL,
             '"1","Rush"' . PHP_EOL,
             '"2","Prisoners"' . PHP_EOL,
-            '"3","Insidious 2"' . PHP_EOL
+            '"3","Insidious 2"' . PHP_EOL,
         ];
         $this->assertEquals($expectedRoot, file($files['root']->getPathName()));
 
@@ -1027,53 +1195,62 @@ class MapperTest extends TestCase
         $this->assertEquals($expectedActor, file($files['actor']->getPathName()));
     }
 
-    protected function getMixedData()
+    /**
+     * @return array<int, object>
+     */
+    protected function getMixedData(): array
     {
         return [
-            (object)[
+            (object) [
                 'id' => 1,
                 'arr' => [
                     1.1,
-                    1.2
-                ]
+                    1.2,
+                ],
             ],
-            (object)[ // poor data
+            (object) [ // poor data
                 'id' => 2,
-                'arr' => 2.1
-            ]
+                'arr' => 2.1,
+            ],
         ];
     }
 
-    protected function getSampleData()
+    /**
+     * @return array<int, object>
+     */
+    protected function getSampleData(): array
     {
         return [
-            (object)[
+            (object) [
                 'timestamp' => 1234567890,
                 'id' => 1,
                 'text' => 'asdf',
-                'user' => (object)[
+                'user' => (object) [
                     'id' => 123,
-                    'username' => 'alois'
+                    'username' => 'alois',
                 ],
                 'reactions' => [
-                    (object)[
-                        'user' => (object)[
+                    (object) [
+                        'user' => (object) [
                             'id' => 456,
-                            'username' => 'jose'
-                        ]
+                            'username' => 'jose',
+                        ],
                     ],
-                    (object)[
-                        'user' => (object)[
+                    (object) [
+                        'user' => (object) [
                             'id' => 789,
-                            'username' => 'mike'
-                        ]
-                    ]
-                ]
-            ]
+                            'username' => 'mike',
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
-    protected function getSampleDataSimple()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSampleDataSimple(): array
     {
         $json = <<<JSON
 [

@@ -1,24 +1,31 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Keboola\CsvMap\Exception;
 
-class CsvMapperException extends \Exception
+use Exception;
+
+class CsvMapperException extends Exception
 {
 
-    protected $data = array();
+    /**
+     * @var array<mixed> $data
+     */
+    protected array $data = [];
 
     /**
-     * @return array
+     * @return array<mixed>
      */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
 
     /**
-     * @param array $data
-     * @return $this
+     * @param array<mixed> $data
      */
-    public function setData(array $data)
+    public function setData(array $data): self
     {
         $this->data = $data;
 

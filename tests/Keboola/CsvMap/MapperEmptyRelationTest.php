@@ -1,12 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\CsvMap;
 
 use PHPUnit\Framework\TestCase;
 
 class MapperEmptyRelationTest extends TestCase
 {
-    public function testParseEmptyRelation()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParseEmptyRelation(): void
     {
         $mapping = [
             'id' => [
@@ -14,7 +22,7 @@ class MapperEmptyRelationTest extends TestCase
                 'mapping' => [
                     'destination' => 'pk',
                     'primaryKey' => true,
-                ]
+                ],
             ],
             'timestamp' => 'timestamp',
             'reactions' => [
@@ -23,8 +31,8 @@ class MapperEmptyRelationTest extends TestCase
                 'tableMapping' => [
                     'user.id' => 'id',
                     'user.username' => 'username',
-                ]
-            ]
+                ],
+            ],
         ];
 
         // one row
@@ -40,7 +48,6 @@ class MapperEmptyRelationTest extends TestCase
 CSV;
         $this->assertFileExists($file1->getPathname());
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
-
 
         $file2 = $parser->getCsvFiles()['reactions'];
 
@@ -65,17 +72,19 @@ CSV;
         $this->assertFileExists($file1->getPathname());
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
 
-
         $file2 = $parser->getCsvFiles()['reactions'];
 
-        $expected2 = <<<CSV
-"id","username","root_pk"\n
-CSV;
         $this->assertFileExists($file2->getPathname());
         $this->assertEquals($expected2, file_get_contents($file2->getPathname()));
     }
 
-    public function testParseEmptyRelationFew()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testParseEmptyRelationFew(): void
     {
         $mapping = [
             'id' => [
@@ -83,7 +92,7 @@ CSV;
                 'mapping' => [
                     'destination' => 'pk',
                     'primaryKey' => true,
-                ]
+                ],
             ],
             'timestamp' => 'timestamp',
             'reactions' => [
@@ -92,8 +101,8 @@ CSV;
                 'tableMapping' => [
                     'user.id' => 'id',
                     'user.username' => 'username',
-                ]
-            ]
+                ],
+            ],
         ];
 
         // multiple rows
@@ -113,7 +122,6 @@ CSV;
         $this->assertFileExists($file1->getPathname());
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
 
-
         $file2 = $parser->getCsvFiles()['reactions'];
 
         $expected2 = <<<CSV
@@ -125,7 +133,10 @@ CSV;
         $this->assertEquals($expected2, file_get_contents($file2->getPathname()));
     }
 
-    protected function getSampleDataSimple()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSampleDataSimple(): array
     {
         $json = <<<JSON
 [
@@ -139,7 +150,10 @@ JSON;
         return json_decode($json, true);
     }
 
-    protected function getSampleDataMulti()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSampleDataMulti(): array
     {
         $json = <<<JSON
 [
@@ -158,8 +172,10 @@ JSON;
         return json_decode($json, true);
     }
 
-
-    protected function getSampleDataMultiFirstEmpty()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSampleDataMultiFirstEmpty(): array
     {
         $json = <<<JSON
 [

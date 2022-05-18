@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\CsvMap;
 
 use PHPUnit\Framework\TestCase;
@@ -7,7 +9,13 @@ use PHPUnit\Framework\TestCase;
 class MapperShorthandTest extends TestCase
 {
 
-    public function testParseShorthand()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testParseShorthand(): void
     {
         $config = [
             'id' => 'id',
@@ -27,7 +35,13 @@ CSV;
         $this->assertEquals($expected, file_get_contents($file->getPathname()));
     }
 
-    public function testParseShorthandWithRelation()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParseShorthandWithRelation(): void
     {
         $config = [
             'id' => [
@@ -35,7 +49,7 @@ CSV;
                 'mapping' => [
                     'destination' => 'pk',
                     'primaryKey' => true,
-                ]
+                ],
             ],
             'timestamp' => 'timestamp',
             'reactions' => [
@@ -44,8 +58,8 @@ CSV;
                 'tableMapping' => [
                     'user.id' => 'id',
                     'user.username' => 'username',
-                ]
-            ]
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -60,7 +74,6 @@ CSV;
 CSV;
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
 
-
         $file2 = $parser->getCsvFiles()['reactions'];
 
         $expected2 = <<<CSV
@@ -71,7 +84,10 @@ CSV;
         $this->assertEquals($expected2, file_get_contents($file2->getPathname()));
     }
 
-    protected function getSampleData()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSampleData(): array
     {
         $json = <<<JSON
 [

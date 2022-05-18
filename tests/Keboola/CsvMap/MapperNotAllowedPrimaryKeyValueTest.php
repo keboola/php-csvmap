@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\CsvMap;
 
 use Keboola\CsvMap\Exception\BadConfigException;
@@ -9,8 +11,11 @@ class MapperNotAllowedPrimaryKeyValueTest extends TestCase
 {
     /**
      * Primary key: [{"$oid":"5716054bee6e764c94fa85a6"}]
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Csv\Exception
      */
-    public function testNotAllowedPrimaryKeyValue()
+    public function testNotAllowedPrimaryKeyValue(): void
     {
         $config = [
             '_id' => [
@@ -18,15 +23,15 @@ class MapperNotAllowedPrimaryKeyValueTest extends TestCase
                 'mapping' => [
                     'destination' => 'id',
                     'primaryKey' => true,
-                ]
+                ],
             ],
             'coord' => [
                 'type' => 'table',
                 'destination' => 'coord',
                 'tableMapping' => [
                     'a' => 'a',
-                ]
-            ]
+                ],
+            ],
         ];
 
         $data = $this->getSampleData();
@@ -37,7 +42,10 @@ class MapperNotAllowedPrimaryKeyValueTest extends TestCase
         $parser->parse($data);
     }
 
-    protected function getSampleData()
+    /**
+     * @return array<int, object>
+     */
+    protected function getSampleData(): array
     {
         $json = <<<JSON
 [
