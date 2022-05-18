@@ -1,12 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\CsvMap;
 
 use PHPUnit\Framework\TestCase;
 
 class MapperWrongPathTest extends TestCase
 {
-    public function testParseWrongMain()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParseWrongMain(): void
     {
         $mapping = [
             'nonExistent1' => 'nonExistent1',
@@ -41,7 +49,13 @@ CSV;
         $this->assertEquals($expected, file_get_contents($file->getPathname()));
     }
 
-    public function testParseWrongRelation()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     * @throws \Keboola\Csv\Exception
+     */
+    public function testParseWrongRelation(): void
     {
         $mapping = [
             'id' => [
@@ -49,7 +63,7 @@ CSV;
                 'mapping' => [
                     'destination' => 'pk',
                     'primaryKey' => true,
-                ]
+                ],
             ],
             'timestamp' => 'timestamp',
             'nonexistent' => [
@@ -58,8 +72,8 @@ CSV;
                 'tableMapping' => [
                     'user.id' => 'id',
                     'user.username' => 'username',
-                ]
-            ]
+                ],
+            ],
         ];
 
         // one row
@@ -75,7 +89,6 @@ CSV;
 CSV;
         $this->assertFileExists($file1->getPathname());
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
-
 
         $file2 = $parser->getCsvFiles()['nonexistent'];
 
@@ -101,7 +114,6 @@ CSV;
         $this->assertFileExists($file1->getPathname());
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
 
-
         $file2 = $parser->getCsvFiles()['nonexistent'];
 
         $expected2 = <<<CSV
@@ -113,7 +125,13 @@ CSV;
         $this->assertEquals($expected2, file_get_contents($file2->getPathname()));
     }
 
-    public function testParseWrongBothMainAndRelation()
+    /**
+     * @throws \Keboola\CsvMap\Exception\BadDataException
+     * @throws \Keboola\Utils\Exception
+     * @throws \Keboola\Csv\Exception
+     * @throws \Keboola\CsvMap\Exception\BadConfigException
+     */
+    public function testParseWrongBothMainAndRelation(): void
     {
         $mapping = [
             'nonexistent1' => [
@@ -121,7 +139,7 @@ CSV;
                 'mapping' => [
                     'destination' => 'nonexistent1',
                     'primaryKey' => true,
-                ]
+                ],
             ],
             'nonexistent2' => 'nonexistent2',
             'nonexistent3' => [
@@ -130,8 +148,8 @@ CSV;
                 'tableMapping' => [
                     'user.id' => 'id',
                     'user.username' => 'username',
-                ]
-            ]
+                ],
+            ],
         ];
 
         // one row
@@ -147,7 +165,6 @@ CSV;
 CSV;
         $this->assertFileExists($file1->getPathname());
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
-
 
         $file2 = $parser->getCsvFiles()['nonexistent3'];
 
@@ -173,7 +190,6 @@ CSV;
         $this->assertFileExists($file1->getPathname());
         $this->assertEquals($expected1, file_get_contents($file1->getPathname()));
 
-
         $file2 = $parser->getCsvFiles()['nonexistent3'];
 
         $expected2 = <<<CSV
@@ -185,7 +201,10 @@ CSV;
         $this->assertEquals($expected2, file_get_contents($file2->getPathname()));
     }
 
-    protected function getSampleDataSimple()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSampleDataSimple(): array
     {
         $json = <<<JSON
 [
@@ -199,7 +218,10 @@ JSON;
         return json_decode($json, true);
     }
 
-    protected function getSampleDataMulti()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSampleDataMulti(): array
     {
         $json = <<<JSON
 [
