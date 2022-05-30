@@ -212,3 +212,7 @@ Mixed `column` and `table` mappings.
     ]
 ]
 ```
+
+## License
+
+MIT licensed, see [LICENSE](./LICENSE) file.
