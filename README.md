@@ -101,9 +101,9 @@ Four different `column` mappings.
     'info.url' => 'url,
     'info.tags' => [
         'type' => 'column', 
+        'forceType' => true,
         'mapping' => [
-            'destination' => 'tags',
-            'forceType' => true,
+            'destination' => 'tags'
         ] 
     ]
 ]
