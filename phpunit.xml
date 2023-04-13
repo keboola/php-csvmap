@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnFailure="false"
-         bootstrap="vendor/autoload.php">
-
-	<testsuite name="API Test Suite">
-		<directory>tests</directory>
-	</testsuite>
-
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" processIsolation="false" stopOnFailure="false" bootstrap="vendor/autoload.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd" cacheDirectory=".phpunit.cache">
+  <testsuite name="API Test Suite">
+    <directory>tests</directory>
+  </testsuite>
 </phpunit>
