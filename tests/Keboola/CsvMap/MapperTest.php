@@ -348,7 +348,7 @@ class MapperTest extends TestCase
                 '"1","asdf"' . PHP_EOL,
                 '"2",""' . PHP_EOL,
             ],
-            file($result['root']->getPathName())
+            file($result['root']->getPathName()),
         );
     }
 
@@ -388,7 +388,7 @@ class MapperTest extends TestCase
                 '"1","-204508800"' . PHP_EOL,
                 '"2",""' . PHP_EOL,
             ],
-            file($result['root']->getPathName())
+            file($result['root']->getPathName()),
         );
     }
 
@@ -559,7 +559,7 @@ class MapperTest extends TestCase
                 '"id","userCol"' . PHP_EOL,
                 '"1","blah"' . PHP_EOL,
             ],
-            file($result['root']->getPathName())
+            file($result['root']->getPathName()),
         );
     }
 
@@ -610,7 +610,7 @@ class MapperTest extends TestCase
                 '"id","userCol"' . PHP_EOL,
                 '"1","blah"' . PHP_EOL,
             ],
-            file($result['root']->getPathName())
+            file($result['root']->getPathName()),
         );
         $this->assertEquals(['id', 'userCol'], $result['root']->getPrimaryKey(true));
 
@@ -620,7 +620,7 @@ class MapperTest extends TestCase
                 '"456","1,blah"' . PHP_EOL,
                 '"789","1,blah"' . PHP_EOL,
             ],
-            file($result['post_reactions']->getPathName())
+            file($result['post_reactions']->getPathName()),
         );
     }
 
@@ -657,7 +657,7 @@ class MapperTest extends TestCase
                 '"id","userCol"' . PHP_EOL,
                 '"1",""' . PHP_EOL,
             ],
-            file($result['root']->getPathName())
+            file($result['root']->getPathName()),
         );
     }
 
@@ -781,11 +781,11 @@ class MapperTest extends TestCase
 
         $this->assertEquals(
             ['"id","user_id"' . PHP_EOL, '"1","123"' . PHP_EOL],
-            file($result['root']->getPathName())
+            file($result['root']->getPathName()),
         );
         $this->assertEquals(
             ['"id","username"' . PHP_EOL, '"123","alois"' . PHP_EOL],
-            file($result['users']->getPathName())
+            file($result['users']->getPathName()),
         );
     }
 
@@ -921,7 +921,7 @@ class MapperTest extends TestCase
 
         $this->assertEquals(
             ['"first_arr_item"' . PHP_EOL, '"one"' . PHP_EOL],
-            file($parser->getCsvFiles()['root']->getPathName())
+            file($parser->getCsvFiles()['root']->getPathName()),
         );
     }
 

@@ -176,8 +176,12 @@ final class Mapper
                         $result[$settings['mapping']['destination']] = getDataFromPath($key, $userData);
                         break;
                     case 'date':
-                        if ($propertyValue !== null && $time = strtotime($propertyValue)) {
-                            $propertyValue = $time;
+                        if ($propertyValue !== null) {
+                            $time = strtotime($propertyValue);
+
+                            if ($time !== false) {
+                                $propertyValue = $time;
+                            }
                         }
 
                         $result[$settings['mapping']['destination']] = $propertyValue;
@@ -209,7 +213,7 @@ final class Mapper
         foreach ($values as $value) {
             if (!is_scalar($value) && !is_null($value)) {
                 throw new BadConfigException(
-                    'Only scalar values are allowed in primary key. Primary key: ' . json_encode($values)
+                    'Only scalar values are allowed in primary key. Primary key: ' . json_encode($values),
                 );
             }
         }
@@ -288,7 +292,7 @@ final class Mapper
         if (!empty($settings['destination']) && $settings['destination'] === $this->type) {
             if (empty($settings['parentKey']['disable'])) {
                 throw new BadConfigException(
-                    "'parentKey.disable' must be true to parse child values into parent's table"
+                    "'parentKey.disable' must be true to parse child values into parent's table",
                 );
             }
 
@@ -376,7 +380,7 @@ final class Mapper
             [
                 $this->type => $this->getResultFile(),
             ],
-            $childResults
+            $childResults,
         );
     }
 }
