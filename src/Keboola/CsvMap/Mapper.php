@@ -175,6 +175,13 @@ final class Mapper
                     case 'user':
                         $result[$settings['mapping']['destination']] = getDataFromPath($key, $userData);
                         break;
+                    case 'date':
+                        if ($propertyValue !== null && $time = strtotime($propertyValue)) {
+                            $propertyValue = $time;
+                        }
+
+                        $result[$settings['mapping']['destination']] = $propertyValue;
+                        break;
                     case 'column':
                     default:
                         if (!is_scalar($propertyValue) && !is_null($propertyValue) && !empty($settings['forceType'])) {
@@ -327,6 +334,7 @@ final class Mapper
             if (empty($settings['type'])
                 || $settings['type'] === 'column'
                 || $settings['type'] === 'user'
+                || $settings['type'] === 'date'
             ) {
                 if (empty($settings['mapping']['destination'])) {
                     throw new BadConfigException("Key 'mapping.destination' is not set for column '$key'.");

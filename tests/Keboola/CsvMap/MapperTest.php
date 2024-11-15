@@ -352,6 +352,46 @@ class MapperTest extends TestCase
         );
     }
 
+    public function testDate(): void
+    {
+        $config = [
+            'id' => [
+                'mapping' => [
+                    'destination' => 'id',
+                ],
+            ],
+            'birthDate' => [
+                'type' => 'date',
+                'mapping' => [
+                    'destination' => 'birthTime',
+                ],
+            ],
+        ];
+
+        $data = [
+            (object) [
+                'id' => 1,
+                'birthDate' => '1963-07-10T00:00:00.000Z',
+            ],
+            (object) [
+                'id' => 2,
+            ],
+        ];
+
+        $parser = new Mapper($config);
+        $parser->parse($data);
+        $result = $parser->getCsvFiles();
+
+        $this->assertEquals(
+            [
+                '"id","birthTime"' . PHP_EOL,
+                '"1","-204508800"' . PHP_EOL,
+                '"2",""' . PHP_EOL,
+            ],
+            file($result['root']->getPathName())
+        );
+    }
+
     /**
      * @throws \Keboola\CsvMap\Exception\BadDataException
      * @throws \Keboola\Utils\Exception
