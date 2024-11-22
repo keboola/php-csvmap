@@ -175,6 +175,17 @@ final class Mapper
                     case 'user':
                         $result[$settings['mapping']['destination']] = getDataFromPath($key, $userData);
                         break;
+                    case 'date':
+                        if ($propertyValue !== null) {
+                            $time = strtotime($propertyValue);
+
+                            if ($time !== false) {
+                                $propertyValue = $time;
+                            }
+                        }
+
+                        $result[$settings['mapping']['destination']] = $propertyValue;
+                        break;
                     case 'column':
                     default:
                         if (!is_scalar($propertyValue) && !is_null($propertyValue) && !empty($settings['forceType'])) {
@@ -202,7 +213,7 @@ final class Mapper
         foreach ($values as $value) {
             if (!is_scalar($value) && !is_null($value)) {
                 throw new BadConfigException(
-                    'Only scalar values are allowed in primary key. Primary key: ' . json_encode($values)
+                    'Only scalar values are allowed in primary key. Primary key: ' . json_encode($values),
                 );
             }
         }
@@ -281,7 +292,7 @@ final class Mapper
         if (!empty($settings['destination']) && $settings['destination'] === $this->type) {
             if (empty($settings['parentKey']['disable'])) {
                 throw new BadConfigException(
-                    "'parentKey.disable' must be true to parse child values into parent's table"
+                    "'parentKey.disable' must be true to parse child values into parent's table",
                 );
             }
 
@@ -327,6 +338,7 @@ final class Mapper
             if (empty($settings['type'])
                 || $settings['type'] === 'column'
                 || $settings['type'] === 'user'
+                || $settings['type'] === 'date'
             ) {
                 if (empty($settings['mapping']['destination'])) {
                     throw new BadConfigException("Key 'mapping.destination' is not set for column '$key'.");
@@ -368,7 +380,7 @@ final class Mapper
             [
                 $this->type => $this->getResultFile(),
             ],
-            $childResults
+            $childResults,
         );
     }
 }
